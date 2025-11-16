@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Convertisseur & Compresseur de fichiers</title>
+    <title>FluxConvert – Convertisseur & Compresseur de fichiers</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
@@ -19,8 +19,18 @@
             --danger: #ef4444;
         }
 
-        * {
-            box-sizing: border-box;
+        /* Thème clair */
+        body[data-theme="light"] {
+            --bg: #f3f4f6;
+            --bg-card: #ffffff;
+            --bg-elevated: #f9fafb;
+            --border-subtle: #e5e7eb;
+            --accent: #4f46e5;
+            --accent-soft: rgba(79, 70, 229, 0.08);
+            --accent-strong: #4f46e5;
+            --text: #111827;
+            --text-soft: #6b7280;
+            --danger: #b91c1c;
         }
 
         body {
@@ -33,6 +43,14 @@
             align-items: center;
             justify-content: center;
             padding: 24px;
+        }
+
+        body[data-theme="light"] {
+            background: radial-gradient(circle at top, #e5e7eb 0, #f3f4f6 40%, #e5e7eb 100%);
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         .shell {
@@ -68,6 +86,10 @@
             color: white;
         }
 
+        body[data-theme="light"] .logo {
+            background: radial-gradient(circle at 30% 30%, #f97316, #ef4444, #4f46e5);
+        }
+
         .title-block h1 {
             font-size: 1.3rem;
             margin: 0;
@@ -79,6 +101,13 @@
             color: var(--text-soft);
         }
 
+        .header-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+        }
+
         .badge {
             font-size: 0.75rem;
             border-radius: 999px;
@@ -86,6 +115,48 @@
             border: 1px solid rgba(148, 163, 184, 0.5);
             color: var(--text-soft);
             white-space: nowrap;
+        }
+
+        .top-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .pill-button {
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.6);
+            background: rgba(15,23,42,0.9);
+            color: #e5e7eb;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+        }
+
+        body[data-theme="light"] .pill-button {
+            background: #f9fafb;
+            color: #111827;
+        }
+
+        .pill-button span.icon {
+            font-size: 0.95rem;
+        }
+
+        .lang-select {
+            border-radius: 999px;
+            border: 1px solid rgba(148,163,184,0.6);
+            background: rgba(15,23,42,0.9);
+            color: #e5e7eb;
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+
+        body[data-theme="light"] .lang-select {
+            background: #f9fafb;
+            color: #111827;
         }
 
         .grid {
@@ -108,6 +179,13 @@
                 0 22px 45px rgba(0,0,0,0.8),
                 0 0 0 1px rgba(148,163,184,0.12);
             padding: 18px 18px 16px;
+        }
+
+        body[data-theme="light"] .card {
+            background: var(--bg-card);
+            box-shadow:
+                0 16px 40px rgba(15, 23, 42, 0.10),
+                0 0 0 1px rgba(148,163,184,0.18);
         }
 
         .card h2 {
@@ -141,6 +219,11 @@
             border: 1px solid rgba(55, 65, 81, 0.9);
         }
 
+        body[data-theme="light"] .step {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+        }
+
         .step span.icon {
             width: 18px;
             height: 18px;
@@ -154,7 +237,7 @@
         }
 
         .step strong {
-            color: #e5e7eb;
+            color: var(--text);
         }
 
         .step small {
@@ -176,6 +259,10 @@
             transition: border-color 0.2s, background 0.2s, transform 0.08s;
         }
 
+        body[data-theme="light"] .dropzone {
+            background: radial-gradient(circle at top left, rgba(56,189,248,0.06), #f9fafb);
+        }
+
         .dropzone.dragover {
             border-color: var(--accent);
             background: radial-gradient(circle at top, rgba(129,140,248,0.22), transparent 60%);
@@ -194,12 +281,17 @@
             font-size: 18px;
         }
 
+        body[data-theme="light"] .dz-icon {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+        }
+
         .dz-main {
             font-size: 0.9rem;
         }
 
         .dz-main strong {
-            color: #e5e7eb;
+            color: var(--text);
         }
 
         .dz-main span {
@@ -222,6 +314,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        body[data-theme="light"] .dz-filename {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+            color: #111827;
         }
 
         input[type="file"] {
@@ -258,6 +356,11 @@
             outline: none;
         }
 
+        body[data-theme="light"] select {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+        }
+
         select:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
@@ -270,7 +373,7 @@
             gap: 6px;
         }
 
-        button {
+        button.main-btn {
             border-radius: 999px;
             border: none;
             padding: 9px 14px;
@@ -287,13 +390,13 @@
             box-shadow: 0 10px 25px rgba(129,140,248,0.4);
         }
 
-        button:hover:not(:disabled) {
+        button.main-btn:hover:not(:disabled) {
             transform: translateY(-0.5px);
             box-shadow: 0 16px 35px rgba(129,140,248,0.5);
             opacity: 0.96;
         }
 
-        button:disabled {
+        button.main-btn:disabled {
             opacity: 0.6;
             cursor: default;
             box-shadow: none;
@@ -341,6 +444,12 @@
             100% { transform: scale(1); opacity: 0.9; }
         }
 
+        .hint {
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            margin-top: 4px;
+        }
+
         .side {
             display: flex;
             flex-direction: column;
@@ -353,6 +462,10 @@
             border: 1px solid rgba(31,41,55,0.95);
             background: linear-gradient(145deg, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
             padding: 12px 14px;
+        }
+
+        body[data-theme="light"] .side-card {
+            background: linear-gradient(145deg, #ffffff, #f9fafb);
         }
 
         .side-title {
@@ -377,18 +490,19 @@
             background: rgba(15,23,42,0.95);
         }
 
+        body[data-theme="light"] .pill {
+            background: #f9fafb;
+            border-color: #e5e7eb;
+            color: #111827;
+        }
+
         .muted {
             color: var(--text-soft);
         }
 
         .muted-strong {
-            color: #e5e7eb;
-        }
-
-        .hint {
-            font-size: 0.72rem;
-            color: var(--text-soft);
-            margin-top: 4px;
+            color: var(--text);
+            font-weight: 500;
         }
 
         .limit {
@@ -402,27 +516,78 @@
             font-size: 0.7rem;
             color: #6b7280;
         }
+
+        /* Footer */
+        .footer {
+            margin-top: 16px;
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px;
+            border-top: 1px solid rgba(31,41,55,0.9);
+            padding-top: 8px;
+        }
+
+        body[data-theme="light"] .footer {
+            border-top-color: #e5e7eb;
+        }
+
+        .footer-left span {
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            cursor: default;
+            text-decoration: none;
+            color: var(--text-soft);
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
-<body>
+<body data-theme="dark">
 <div class="shell">
     <header class="header">
         <div class="brand">
-            <div class="logo">VC</div>
+            <div class="logo">FC</div>
             <div class="title-block">
-                <h1>Convertisseur & compresseur en ligne</h1>
-                <p>Convertis et allège tes vidéos en quelques clics, sans inscription.</p>
+                <h1 data-i18n="header.title">FluxConvert – Convertisseur & compresseur en ligne</h1>
+                <p data-i18n="header.subtitle">Convertis et allège tes vidéos en quelques clics, sans inscription.</p>
             </div>
         </div>
-        <div class="badge">
-            ⚡ 100% gratuit • tourne côté serveur
+        <div class="header-right">
+            <div class="badge" data-i18n="header.badge">
+                ⚡ 100% gratuit • tourne côté serveur
+            </div>
+            <div class="top-controls">
+                <button type="button" class="pill-button" id="theme-toggle">
+                    <span class="icon" id="theme-toggle-icon">🌙</span>
+                    <span id="theme-toggle-label" data-i18n="header.themeDark">Mode sombre</span>
+                </button>
+                <select id="lang-select" class="lang-select">
+                    <option value="auto" data-i18n="lang.auto">Auto</option>
+                    <option value="fr">FR</option>
+                    <option value="en">EN</option>
+                </select>
+            </div>
         </div>
     </header>
 
     <main class="grid">
         <section class="card">
-            <h2>Fichier à transformer</h2>
-            <div class="card-subtitle">
+            <h2 data-i18n="main.title">Fichier à transformer</h2>
+            <div class="card-subtitle" data-i18n="main.subtitle">
                 3 étapes : choisis ton fichier → sélectionne le format et la qualité → récupère le fichier final.
             </div>
 
@@ -430,22 +595,22 @@
                 <div class="step">
                     <span class="icon">1</span>
                     <div>
-                        <strong>Choisis ton fichier</strong>
-                        <small>Vidéo ou audio, jusqu’à quelques centaines de Mo.</small>
+                        <strong data-i18n="steps.1.title">Choisis ton fichier</strong>
+                        <small data-i18n="steps.1.text">Vidéo ou audio, jusqu’à quelques centaines de Mo.</small>
                     </div>
                 </div>
                 <div class="step">
                     <span class="icon">2</span>
                     <div>
-                        <strong>Format & qualité</strong>
-                        <small>MP4, MP3, MOV… compression légère ou forte.</small>
+                        <strong data-i18n="steps.2.title">Format & qualité</strong>
+                        <small data-i18n="steps.2.text">MP4, MP3, MOV… compression légère ou forte.</small>
                     </div>
                 </div>
                 <div class="step">
                     <span class="icon">3</span>
                     <div>
-                        <strong>Télécharge</strong>
-                        <small>Le fichier transformé est prêt en un clic.</small>
+                        <strong data-i18n="steps.3.title">Télécharge</strong>
+                        <small data-i18n="steps.3.text">Le fichier transformé est prêt en un clic.</small>
                     </div>
                 </div>
             </div>
@@ -454,10 +619,10 @@
                 <label for="file" class="dropzone" id="dropzone">
                     <div class="dz-icon">⬆</div>
                     <div class="dz-main">
-                        <strong>Dépose ton fichier ici</strong><br>
-                        <span>ou clique pour le sélectionner</span>
+                        <strong data-i18n="drop.title">Dépose ton fichier ici</strong><br>
+                        <span data-i18n="drop.subtitle">ou clique pour le sélectionner</span>
                     </div>
-                    <div class="dz-sub">
+                    <div class="dz-sub" data-i18n="drop.help">
                         Formats vidéo/audio classiques (MP4, MOV, MKV, MP3, WAV…)
                     </div>
                     <div class="dz-filename" id="dz-filename" style="display:none;"></div>
@@ -466,41 +631,41 @@
 
                 <div class="form-row">
                     <div class="field">
-                        <label for="target_format">Format de sortie</label>
+                        <label for="target_format" data-i18n="form.formatLabel">Format de sortie</label>
                         <select id="target_format" name="target_format">
-                            <option value="mp4">MP4 (vidéo universelle)</option>
-                            <option value="mp3">MP3 (audio compressé)</option>
-                            <option value="wav">WAV (audio brut)</option>
-                            <option value="mkv">MKV (conteneur vidéo)</option>
-                            <option value="mov">MOV (vidéo Apple)</option>
+                            <option value="mp4" data-i18n="form.format.mp4">MP4 (vidéo universelle)</option>
+                            <option value="mp3" data-i18n="form.format.mp3">MP3 (audio compressé)</option>
+                            <option value="wav" data-i18n="form.format.wav">WAV (audio brut)</option>
+                            <option value="mkv" data-i18n="form.format.mkv">MKV (conteneur vidéo)</option>
+                            <option value="mov" data-i18n="form.format.mov">MOV (vidéo Apple)</option>
                         </select>
                     </div>
 
                     <div class="field">
-                        <label for="quality">Qualité / compression</label>
+                        <label for="quality" data-i18n="form.qualityLabel">Qualité / compression</label>
                         <select id="quality" name="quality">
-                            <option value="standard">Standard (qualité normale)</option>
-                            <option value="light">Légère compression (poids réduit)</option>
-                            <option value="strong">Forte compression (poids minimal)</option>
+                            <option value="standard" data-i18n="form.quality.standard">Standard (qualité normale)</option>
+                            <option value="light" data-i18n="form.quality.light">Légère compression (poids réduit)</option>
+                            <option value="strong" data-i18n="form.quality.strong">Forte compression (poids minimal)</option>
                         </select>
                     </div>
                 </div>
 
                 <div class="actions">
-                    <button type="submit" id="convert-btn">
+                    <button type="submit" id="convert-btn" class="main-btn">
                         <div class="btn-label-main">
                             <span class="icon">⚙️</span>
-                            <span>Convertir le fichier</span>
+                            <span data-i18n="button.convert">Convertir le fichier</span>
                         </div>
-                        <div class="btn-sub" id="btn-subtext">
+                        <div class="btn-sub" id="btn-subtext" data-i18n="button.sub">
                             La conversion s’exécute côté serveur, garde l’onglet ouvert.
                         </div>
                     </button>
                     <div class="status" id="status">
                         <div class="status-dot" id="status-dot"></div>
-                        <span id="status-text">Prêt à convertir.</span>
+                        <span id="status-text" data-i18n="status.ready">Prêt à convertir.</span>
                     </div>
-                    <div class="hint">
+                    <div class="hint" data-i18n="hint.text">
                         Astuce : commence par une petite vidéo pour voir la taille finale avec chaque niveau de compression.
                     </div>
                 </div>
@@ -509,92 +674,349 @@
 
         <aside class="side">
             <div class="side-card">
-                <div class="side-title">Profil de sortie conseillé</div>
+                <div class="side-title" data-i18n="side.profile.title">Profil de sortie conseillé</div>
                 <div class="muted">
-                    <span class="muted-strong">Pour TikTok / Reels / Shorts :</span>
+                    <span class="muted-strong" data-i18n="side.profile.subtitle">Pour TikTok / Reels / Shorts :</span>
                     <ul style="margin: 6px 0 4px 16px; padding:0;">
-                        <li>Format : <strong>MP4</strong></li>
-                        <li>Qualité : <strong>“Légère compression”</strong></li>
-                        <li>Résultat : fichier léger, compatible partout.</li>
+                        <li data-i18n="side.profile.li1">Format : <strong>MP4</strong></li>
+                        <li data-i18n="side.profile.li2">Qualité : <strong>“Légère compression”</strong></li>
+                        <li data-i18n="side.profile.li3">Résultat : fichier léger, compatible partout.</li>
                     </ul>
                 </div>
                 <div class="pill-row">
-                    <div class="pill">🔁 Conversion serveur</div>
-                    <div class="pill">🎬 MP4, MOV, MKV</div>
-                    <div class="pill">🎧 MP3, WAV</div>
+                    <div class="pill" data-i18n="side.profile.pill1">🔁 Conversion serveur</div>
+                    <div class="pill" data-i18n="side.profile.pill2">🎬 MP4, MOV, MKV</div>
+                    <div class="pill" data-i18n="side.profile.pill3">🎧 MP3, WAV</div>
                 </div>
-                <div class="limit">
+                <div class="limit" data-i18n="side.profile.limit">
                     Évite d’envoyer des fichiers d’1 Go : commence plutôt par quelques centaines de Mo max.
                 </div>
             </div>
 
             <div class="side-card">
-                <div class="side-title">Bon à savoir</div>
-                <div class="muted">
+                <div class="side-title" data-i18n="side.info.title">Bon à savoir</div>
+                <div class="muted" data-i18n="side.info.text">
                     - Plus la compression est forte, plus la qualité baisse légèrement.<br>
                     - Sur les vidéos très longues, la conversion peut prendre du temps.<br>
                     - Tu peux toujours relancer avec un autre niveau de compression.
                 </div>
-                <div class="legal">
+                <div class="legal" data-i18n="side.info.legal">
                     N’envoie que des fichiers dont tu possèdes les droits ou l’autorisation de traitement.
                 </div>
             </div>
+
+            <div class="side-card">
+                <div class="side-title" data-i18n="side.about.title">À propos de FluxConvert</div>
+                <div class="muted" data-i18n="side.about.text">
+                    FluxConvert est un outil simple pensé pour les créateurs et utilisateurs qui veulent convertir et alléger leurs fichiers sans prise de tête. Aucune inscription, juste un fichier à l’entrée et un fichier prêt à l’emploi à la sortie.
+                </div>
+                <div class="muted" style="margin-top:6px;" data-i18n="side.about.faqIntro">
+                    FAQ rapide :
+                </div>
+                <ul style="margin:4px 0 0 16px; padding:0; list-style:disc;">
+                    <li data-i18n="side.about.q1">Est-ce que c’est payant ? – Non, la version actuelle est 100% gratuite.</li>
+                    <li data-i18n="side.about.q2">Mes fichiers sont-ils stockés ? – Ils sont traités côté serveur puis supprimés après conversion.</li>
+                </ul>
+            </div>
         </aside>
     </main>
+
+    <footer class="footer">
+        <div class="footer-left">
+            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.1 beta – en cours d’amélioration</span>
+        </div>
+        <div class="footer-links">
+            <span class="footer-link" data-i18n="footer.link.about">À propos</span>
+            <span class="footer-link" data-i18n="footer.link.faq">FAQ</span>
+            <span class="footer-link" data-i18n="footer.link.contact">Contact (bientôt)</span>
+        </div>
+    </footer>
 </div>
 
 <script>
-    const fileInput = document.getElementById('file');
-    const dropzone = document.getElementById('dropzone');
-    const filenameEl = document.getElementById('dz-filename');
-    const form = document.getElementById('convert-form');
-    const btn = document.getElementById('convert-btn');
-    const statusText = document.getElementById('status-text');
-    const statusDot = document.getElementById('status-dot');
-    const btnSub = document.getElementById('btn-subtext');
+    document.addEventListener("DOMContentLoaded", function () {
+        const fileInput = document.getElementById('file');
+        const dropzone = document.getElementById('dropzone');
+        const filenameEl = document.getElementById('dz-filename');
+        const form = document.getElementById('convert-form');
+        const btn = document.getElementById('convert-btn');
+        const statusText = document.getElementById('status-text');
+        const statusDot = document.getElementById('status-dot');
+        const btnSub = document.getElementById('btn-subtext');
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeToggleIcon = document.getElementById('theme-toggle-icon');
+        const themeToggleLabel = document.getElementById('theme-toggle-label');
+        const rootBody = document.body;
+        const langSelect = document.getElementById('lang-select');
 
-    function updateFilename() {
-        const file = fileInput.files[0];
-        if (file) {
-            filenameEl.style.display = 'inline-block';
-            filenameEl.textContent = file.name + ' • ' + Math.round(file.size / 1024 / 1024 * 10) / 10 + ' Mo';
-        } else {
-            filenameEl.style.display = 'none';
-            filenameEl.textContent = '';
+        const translations = {
+            fr: {
+                "header.title": "FluxConvert – Convertisseur & compresseur en ligne",
+                "header.subtitle": "Convertis et allège tes vidéos en quelques clics, sans inscription.",
+                "header.badge": "⚡ 100% gratuit • tourne côté serveur",
+                "header.themeDark": "Mode sombre",
+                "header.themeLight": "Mode clair",
+                "lang.auto": "Auto",
+                "main.title": "Fichier à transformer",
+                "main.subtitle": "3 étapes : choisis ton fichier → sélectionne le format et la qualité → récupère le fichier final.",
+                "steps.1.title": "Choisis ton fichier",
+                "steps.1.text": "Vidéo ou audio, jusqu’à quelques centaines de Mo.",
+                "steps.2.title": "Format & qualité",
+                "steps.2.text": "MP4, MP3, MOV… compression légère ou forte.",
+                "steps.3.title": "Télécharge",
+                "steps.3.text": "Le fichier transformé est prêt en un clic.",
+                "drop.title": "Dépose ton fichier ici",
+                "drop.subtitle": "ou clique pour le sélectionner",
+                "drop.help": "Formats vidéo/audio classiques (MP4, MOV, MKV, MP3, WAV…)",
+                "form.formatLabel": "Format de sortie",
+                "form.format.mp4": "MP4 (vidéo universelle)",
+                "form.format.mp3": "MP3 (audio compressé)",
+                "form.format.wav": "WAV (audio brut)",
+                "form.format.mkv": "MKV (conteneur vidéo)",
+                "form.format.mov": "MOV (vidéo Apple)",
+                "form.qualityLabel": "Qualité / compression",
+                "form.quality.standard": "Standard (qualité normale)",
+                "form.quality.light": "Légère compression (poids réduit)",
+                "form.quality.strong": "Forte compression (poids minimal)",
+                "button.convert": "Convertir le fichier",
+                "button.sub": "La conversion s’exécute côté serveur, garde l’onglet ouvert.",
+                "status.ready": "Prêt à convertir.",
+                "status.running": "Conversion en cours… ne ferme pas cette page.",
+                "hint.text": "Astuce : commence par une petite vidéo pour voir la taille finale avec chaque niveau de compression.",
+                "side.profile.title": "Profil de sortie conseillé",
+                "side.profile.subtitle": "Pour TikTok / Reels / Shorts :",
+                "side.profile.li1": "Format : <strong>MP4</strong>",
+                "side.profile.li2": "Qualité : <strong>“Légère compression”</strong>",
+                "side.profile.li3": "Résultat : fichier léger, compatible partout.",
+                "side.profile.pill1": "🔁 Conversion serveur",
+                "side.profile.pill2": "🎬 MP4, MOV, MKV",
+                "side.profile.pill3": "🎧 MP3, WAV",
+                "side.profile.limit": "Évite d’envoyer des fichiers d’1 Go : commence plutôt par quelques centaines de Mo max.",
+                "side.info.title": "Bon à savoir",
+                "side.info.text": "- Plus la compression est forte, plus la qualité baisse légèrement.<br>- Sur les vidéos très longues, la conversion peut prendre du temps.<br>- Tu peux toujours relancer avec un autre niveau de compression.",
+                "side.info.legal": "N’envoie que des fichiers dont tu possèdes les droits ou l’autorisation de traitement.",
+                "side.about.title": "À propos de FluxConvert",
+                "side.about.text": "FluxConvert est un outil simple pensé pour les créateurs et utilisateurs qui veulent convertir et alléger leurs fichiers sans prise de tête. Aucune inscription, juste un fichier à l’entrée et un fichier prêt à l’emploi à la sortie.",
+                "side.about.faqIntro": "FAQ rapide :",
+                "side.about.q1": "Est-ce que c’est payant ? – Non, la version actuelle est 100% gratuite.",
+                "side.about.q2": "Mes fichiers sont-ils stockés ? – Ils sont traités côté serveur puis supprimés après conversion.",
+                "footer.version": "v0.1 beta – en cours d’amélioration",
+                "footer.link.about": "À propos",
+                "footer.link.faq": "FAQ",
+                "footer.link.contact": "Contact (bientôt)"
+            },
+            en: {
+                "header.title": "FluxConvert – Online Converter & Compressor",
+                "header.subtitle": "Convert and shrink your videos in a few clicks, no signup required.",
+                "header.badge": "⚡ 100% free • runs on the server",
+                "header.themeDark": "Dark mode",
+                "header.themeLight": "Light mode",
+                "lang.auto": "Auto",
+                "main.title": "File to process",
+                "main.subtitle": "3 steps: pick your file → choose format and quality → download the final file.",
+                "steps.1.title": "Pick your file",
+                "steps.1.text": "Video or audio, up to a few hundred MB.",
+                "steps.2.title": "Format & quality",
+                "steps.2.text": "MP4, MP3, MOV… light or strong compression.",
+                "steps.3.title": "Download",
+                "steps.3.text": "Your converted file is ready in one click.",
+                "drop.title": "Drop your file here",
+                "drop.subtitle": "or click to browse",
+                "drop.help": "Common video/audio formats (MP4, MOV, MKV, MP3, WAV…)",
+                "form.formatLabel": "Output format",
+                "form.format.mp4": "MP4 (universal video)",
+                "form.format.mp3": "MP3 (compressed audio)",
+                "form.format.wav": "WAV (raw audio)",
+                "form.format.mkv": "MKV (video container)",
+                "form.format.mov": "MOV (Apple video)",
+                "form.qualityLabel": "Quality / compression",
+                "form.quality.standard": "Standard (normal quality)",
+                "form.quality.light": "Light compression (smaller size)",
+                "form.quality.strong": "Strong compression (minimal size)",
+                "button.convert": "Convert file",
+                "button.sub": "Conversion runs on the server, keep this tab open.",
+                "status.ready": "Ready to convert.",
+                "status.running": "Converting… don’t close this page.",
+                "hint.text": "Tip: start with a small video to see the final size with each compression level.",
+                "side.profile.title": "Recommended output profile",
+                "side.profile.subtitle": "For TikTok / Reels / Shorts:",
+                "side.profile.li1": "Format: <strong>MP4</strong>",
+                "side.profile.li2": "Quality: <strong>“Light compression”</strong>",
+                "side.profile.li3": "Result: small file, compatible everywhere.",
+                "side.profile.pill1": "🔁 Server-side conversion",
+                "side.profile.pill2": "🎬 MP4, MOV, MKV",
+                "side.profile.pill3": "🎧 MP3, WAV",
+                "side.profile.limit": "Avoid uploading 1 GB files: start with a few hundred MB max.",
+                "side.info.title": "Good to know",
+                "side.info.text": "- The stronger the compression, the more quality you lose slightly.<br>- Very long videos can take some time to process.<br>- You can always rerun with a different compression level.",
+                "side.info.legal": "Only upload files you own or are allowed to process.",
+                "side.about.title": "About FluxConvert",
+                "side.about.text": "FluxConvert is a simple tool built for creators and everyday users who want to convert and shrink their files without hassle. No signup, just a file in and a ready-to-use file out.",
+                "side.about.faqIntro": "Quick FAQ:",
+                "side.about.q1": "Is it paid? – No, the current version is 100% free.",
+                "side.about.q2": "Are my files stored? – They are processed server-side then removed after conversion.",
+                "footer.version": "v0.1 beta – actively improving",
+                "footer.link.about": "About",
+                "footer.link.faq": "FAQ",
+                "footer.link.contact": "Contact (soon)"
+            }
+        };
+
+        function updateFilename() {
+            const file = fileInput.files[0];
+            if (file) {
+                filenameEl.style.display = 'inline-block';
+                filenameEl.textContent =
+                    file.name + ' • ' +
+                    Math.round(file.size / 1024 / 1024 * 10) / 10 + ' Mo';
+            } else {
+                filenameEl.style.display = 'none';
+                filenameEl.textContent = '';
+            }
         }
-    }
 
-    dropzone.addEventListener('click', () => fileInput.click());
+        dropzone.addEventListener('click', () => fileInput.click());
 
-    dropzone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropzone.classList.add('dragover');
-    });
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
 
-    dropzone.addEventListener('dragleave', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-    });
+        dropzone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        });
 
-    dropzone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropzone.classList.remove('dragover');
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            fileInput.files = e.dataTransfer.files;
-            updateFilename();
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                updateFilename();
+            }
+        });
+
+        fileInput.addEventListener('change', updateFilename);
+
+        form.addEventListener('submit', () => {
+            if (!fileInput.files[0]) {
+                return;
+            }
+            btn.disabled = true;
+            statusDot.classList.add('busy');
+            const lang = getCurrentLang();
+            const dict = translations[lang] || translations.en;
+            statusText.textContent = dict["status.running"];
+            btnSub.textContent =
+                lang === 'fr'
+                    ? "La conversion peut prendre un peu de temps selon la taille du fichier."
+                    : "Conversion time depends on the size of your file.";
+        });
+
+        // Thème (dark / light)
+        function applyTheme(theme) {
+            rootBody.setAttribute('data-theme', theme);
+            const lang = getCurrentLang();
+            const t = translations[lang];
+            if (theme === 'dark') {
+                themeToggleIcon.textContent = '🌙';
+                themeToggleLabel.textContent = t["header.themeDark"];
+            } else {
+                themeToggleIcon.textContent = '☀️';
+                themeToggleLabel.textContent = t["header.themeLight"];
+            }
+            localStorage.setItem('vc-theme', theme);
         }
-    });
 
-    fileInput.addEventListener('change', updateFilename);
-
-    form.addEventListener('submit', () => {
-        if (!fileInput.files[0]) {
-            return;
+        function initTheme() {
+            const stored = localStorage.getItem('vc-theme');
+            if (stored === 'light' || stored === 'dark') {
+                applyTheme(stored);
+            } else {
+                const prefersLight = window.matchMedia &&
+                    window.matchMedia('(prefers-color-scheme: light)').matches;
+                applyTheme(prefersLight ? 'light' : 'dark');
+            }
         }
-        btn.disabled = true;
-        statusDot.classList.add('busy');
-        statusText.textContent = 'Conversion en cours… ne ferme pas cette page.';
-        btnSub.textContent = 'La conversion peut prendre un peu de temps selon la taille du fichier.';
+
+        themeToggleBtn.addEventListener('click', () => {
+            const current = rootBody.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+        });
+
+        // Langue
+        function detectBrowserLang() {
+            const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+            if (navLang.startsWith('fr')) return 'fr';
+            // tout le reste → anglais
+            return 'en';
+        }
+
+        function getCurrentLang() {
+            const stored = localStorage.getItem('vc-lang');
+            if (stored === 'fr' || stored === 'en') return stored;
+            const selection = langSelect.value;
+            if (selection === 'fr' || selection === 'en') return selection;
+            return detectBrowserLang();
+        }
+
+        function applyTranslations(lang) {
+            const dict = translations[lang] || translations.en;
+            document.querySelectorAll('[data-i18n]').forEach((el) => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) {
+                    if (dict[key].includes('<br') || dict[key].includes('<strong')) {
+                        el.innerHTML = dict[key];
+                    } else {
+                        el.textContent = dict[key];
+                    }
+                }
+            });
+
+            // label thème
+            const theme = rootBody.getAttribute('data-theme') || 'dark';
+            if (theme === 'dark') {
+                themeToggleLabel.textContent = dict["header.themeDark"];
+            } else {
+                themeToggleLabel.textContent = dict["header.themeLight"];
+            }
+
+            // option "Auto"
+            langSelect.querySelector('option[value="auto"]').textContent = dict["lang.auto"];
+
+            // status & bouton sub
+            statusText.textContent = dict["status.ready"];
+            btnSub.textContent = dict["button.sub"];
+        }
+
+        function initLang() {
+            const stored = localStorage.getItem('vc-lang');
+            if (stored === 'fr' || stored === 'en') {
+                langSelect.value = stored;
+                applyTranslations(stored);
+            } else {
+                langSelect.value = 'auto';
+                const detected = detectBrowserLang();
+                applyTranslations(detected);
+            }
+        }
+
+        langSelect.addEventListener('change', () => {
+            const value = langSelect.value;
+            if (value === 'fr' || value === 'en') {
+                localStorage.setItem('vc-lang', value);
+                applyTranslations(value);
+            } else {
+                localStorage.removeItem('vc-lang');
+                const detected = detectBrowserLang();
+                applyTranslations(detected);
+            }
+        });
+
+        // Init
+        initLang();
+        initTheme();
     });
 </script>
 </body>
