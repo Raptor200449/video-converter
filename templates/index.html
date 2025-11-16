@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>FluxConvert – Convertisseur & Compresseur de fichiers</title>
+    <title>FluxConvert – Convertisseur & Outils vidéo</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <style>
@@ -54,7 +54,7 @@
         }
 
         .shell {
-            max-width: 960px;
+            max-width: 1100px;
             width: 100%;
             padding: 20px;
         }
@@ -161,11 +161,11 @@
 
         .grid {
             display: grid;
-            grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
             gap: 18px;
         }
 
-        @media (max-width: 800px) {
+        @media (max-width: 900px) {
             .grid {
                 grid-template-columns: minmax(0, 1fr);
             }
@@ -196,13 +196,48 @@
         .card-subtitle {
             font-size: 0.8rem;
             color: var(--text-soft);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
+        }
+
+        .mode-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin: 10px 0 14px;
+        }
+
+        .mode-tab {
+            font-size: 0.78rem;
+            padding: 5px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(55,65,81,0.9);
+            background: rgba(15,23,42,0.9);
+            color: var(--text-soft);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mode-tab span.icon {
+            font-size: 0.9rem;
+        }
+
+        .mode-tab.active {
+            background: var(--accent-soft);
+            color: #e5e7eb;
+            border-color: var(--accent-strong);
+        }
+
+        body[data-theme="light"] .mode-tab {
+            background: #f9fafb;
+            border-color: #e5e7eb;
         }
 
         .steps {
             display: flex;
             gap: 10px;
-            margin-bottom: 14px;
+            margin-bottom: 10px;
             flex-wrap: wrap;
         }
 
@@ -345,7 +380,7 @@
             margin-bottom: 4px;
         }
 
-        select {
+        select, input[type="number"] {
             width: 100%;
             border-radius: 999px;
             border: 1px solid rgba(55,65,81,0.9);
@@ -356,14 +391,27 @@
             outline: none;
         }
 
-        body[data-theme="light"] select {
+        body[data-theme="light"] select,
+        body[data-theme="light"] input[type="number"] {
             background: #f9fafb;
             border-color: #e5e7eb;
         }
 
-        select:focus {
+        select:focus, input[type="number"]:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 1px rgba(129,140,248,0.4);
+        }
+
+        .time-wrapper {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed rgba(55,65,81,0.7);
+        }
+
+        .time-hint {
+            font-size: 0.72rem;
+            color: var(--text-soft);
+            margin-bottom: 4px;
         }
 
         .actions {
@@ -450,6 +498,16 @@
             margin-top: 4px;
         }
 
+        .error-box {
+            font-size: 0.72rem;
+            margin-top: 4px;
+            color: #fca5a5;
+        }
+
+        body[data-theme="light"] .error-box {
+            color: #b91c1c;
+        }
+
         .side {
             display: flex;
             flex-direction: column;
@@ -517,7 +575,6 @@
             color: #6b7280;
         }
 
-        /* Footer */
         .footer {
             margin-top: 16px;
             font-size: 0.72rem;
@@ -562,8 +619,8 @@
         <div class="brand">
             <div class="logo">FC</div>
             <div class="title-block">
-                <h1 data-i18n="header.title">FluxConvert – Convertisseur & compresseur en ligne</h1>
-                <p data-i18n="header.subtitle">Convertis et allège tes vidéos en quelques clics, sans inscription.</p>
+                <h1 data-i18n="header.title">FluxConvert – Convertisseur & outils vidéo</h1>
+                <p data-i18n="header.subtitle">Convertis, compresse, découpe ou transforme tes vidéos en quelques clics.</p>
             </div>
         </div>
         <div class="header-right">
@@ -586,9 +643,32 @@
 
     <main class="grid">
         <section class="card">
-            <h2 data-i18n="main.title">Fichier à transformer</h2>
+            <h2 data-i18n="main.title">Tes outils vidéo en un seul endroit</h2>
             <div class="card-subtitle" data-i18n="main.subtitle">
-                3 étapes : choisis ton fichier → sélectionne le format et la qualité → récupère le fichier final.
+                Choisis un mode : convertir, compresser, extraire l’audio, créer un GIF ou couper un extrait.
+            </div>
+
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="convert">
+                    <span class="icon">🎯</span>
+                    <span data-i18n="modes.convert">Convertir</span>
+                </button>
+                <button class="mode-tab" data-mode="compress">
+                    <span class="icon">🌀</span>
+                    <span data-i18n="modes.compress">Compresser</span>
+                </button>
+                <button class="mode-tab" data-mode="audio">
+                    <span class="icon">🎧</span>
+                    <span data-i18n="modes.audio">Extraire l’audio</span>
+                </button>
+                <button class="mode-tab" data-mode="gif">
+                    <span class="icon">🎞️</span>
+                    <span data-i18n="modes.gif">Créer un GIF</span>
+                </button>
+                <button class="mode-tab" data-mode="cut">
+                    <span class="icon">✂️</span>
+                    <span data-i18n="modes.cut">Couper un extrait</span>
+                </button>
             </div>
 
             <div class="steps">
@@ -602,20 +682,22 @@
                 <div class="step">
                     <span class="icon">2</span>
                     <div>
-                        <strong data-i18n="steps.2.title">Format & qualité</strong>
-                        <small data-i18n="steps.2.text">MP4, MP3, MOV… compression légère ou forte.</small>
+                        <strong data-i18n="steps.2.title">Sélectionne l’outil</strong>
+                        <small data-i18n="steps.2.text">Convertir, compresser, extraire l’audio, GIF ou cut.</small>
                     </div>
                 </div>
                 <div class="step">
                     <span class="icon">3</span>
                     <div>
-                        <strong data-i18n="steps.3.title">Télécharge</strong>
-                        <small data-i18n="steps.3.text">Le fichier transformé est prêt en un clic.</small>
+                        <strong data-i18n="steps.3.title">Télécharge le résultat</strong>
+                        <small data-i18n="steps.3.text">Ton fichier optimisé est prêt en un clic.</small>
                     </div>
                 </div>
             </div>
 
             <form id="convert-form" action="/convert" method="post" enctype="multipart/form-data">
+                <input type="hidden" id="operation" name="operation" value="convert">
+
                 <label for="file" class="dropzone" id="dropzone">
                     <div class="dz-icon">⬆</div>
                     <div class="dz-main">
@@ -651,11 +733,31 @@
                     </div>
                 </div>
 
+                <div class="time-wrapper" id="time-wrapper" style="display:none;">
+                    <div class="time-hint" data-i18n="time.hint">
+                        Pour les modes GIF et Cut : indique un début (en secondes) et soit une durée, soit une fin.
+                    </div>
+                    <div class="form-row">
+                        <div class="field">
+                            <label for="start_time" data-i18n="time.start">Début (secondes)</label>
+                            <input type="number" id="start_time" name="start_time" min="0" step="0.1">
+                        </div>
+                        <div class="field" id="duration-group">
+                            <label for="duration" data-i18n="time.duration">Durée (secondes)</label>
+                            <input type="number" id="duration" name="duration" min="0" step="0.1">
+                        </div>
+                        <div class="field" id="end_time-group" style="display:none;">
+                            <label for="end_time" data-i18n="time.end">Fin (secondes)</label>
+                            <input type="number" id="end_time" name="end_time" min="0" step="0.1">
+                        </div>
+                    </div>
+                </div>
+
                 <div class="actions">
                     <button type="submit" id="convert-btn" class="main-btn">
                         <div class="btn-label-main">
                             <span class="icon">⚙️</span>
-                            <span data-i18n="button.convert">Convertir le fichier</span>
+                            <span data-i18n="button.convert">Lancer l’outil</span>
                         </div>
                         <div class="btn-sub" id="btn-subtext" data-i18n="button.sub">
                             La conversion s’exécute côté serveur, garde l’onglet ouvert.
@@ -663,10 +765,11 @@
                     </button>
                     <div class="status" id="status">
                         <div class="status-dot" id="status-dot"></div>
-                        <span id="status-text" data-i18n="status.ready">Prêt à convertir.</span>
+                        <span id="status-text" data-i18n="status.ready">Prêt à traiter un fichier.</span>
                     </div>
+                    <div id="error-box" class="error-box" style="display:none;"></div>
                     <div class="hint" data-i18n="hint.text">
-                        Astuce : commence par une petite vidéo pour voir la taille finale avec chaque niveau de compression.
+                        Astuce : commence par une petite vidéo pour voir le rendu avant d’envoyer un gros fichier.
                     </div>
                 </div>
             </form>
@@ -674,31 +777,44 @@
 
         <aside class="side">
             <div class="side-card">
-                <div class="side-title" data-i18n="side.profile.title">Profil de sortie conseillé</div>
+                <div class="side-title" data-i18n="side.profile.title">Profils rapides</div>
                 <div class="muted">
-                    <span class="muted-strong" data-i18n="side.profile.subtitle">Pour TikTok / Reels / Shorts :</span>
-                    <ul style="margin: 6px 0 4px 16px; padding:0;">
-                        <li data-i18n="side.profile.li1">Format : <strong>MP4</strong></li>
-                        <li data-i18n="side.profile.li2">Qualité : <strong>“Légère compression”</strong></li>
-                        <li data-i18n="side.profile.li3">Résultat : fichier léger, compatible partout.</li>
+                    <span class="muted-strong" data-i18n="side.profile.convertTitle">Convertir simplement :</span>
+                    <ul style="margin: 4px 0 6px 16px; padding:0;">
+                        <li data-i18n="side.profile.convert1">Mode : Convertir · Format : MP4</li>
+                        <li data-i18n="side.profile.convert2">Parfait pour une lecture universelle.</li>
+                    </ul>
+                </div>
+                <div class="muted">
+                    <span class="muted-strong" data-i18n="side.profile.socialTitle">Pour TikTok / Reels / Shorts :</span>
+                    <ul style="margin: 4px 0 6px 16px; padding:0;">
+                        <li data-i18n="side.profile.social1">Mode : Compresser · Format : MP4</li>
+                        <li data-i18n="side.profile.social2">Qualité : Légère compression.</li>
+                    </ul>
+                </div>
+                <div class="muted">
+                    <span class="muted-strong" data-i18n="side.profile.gifTitle">GIF courts :</span>
+                    <ul style="margin: 4px 0 0 16px; padding:0;">
+                        <li data-i18n="side.profile.gif1">Mode : GIF · Début + durée (5–10s max).</li>
                     </ul>
                 </div>
                 <div class="pill-row">
                     <div class="pill" data-i18n="side.profile.pill1">🔁 Conversion serveur</div>
                     <div class="pill" data-i18n="side.profile.pill2">🎬 MP4, MOV, MKV</div>
                     <div class="pill" data-i18n="side.profile.pill3">🎧 MP3, WAV</div>
+                    <div class="pill" data-i18n="side.profile.pill4">🎞️ GIF courts</div>
                 </div>
                 <div class="limit" data-i18n="side.profile.limit">
-                    Évite d’envoyer des fichiers d’1 Go : commence plutôt par quelques centaines de Mo max.
+                    Évite d’envoyer des fichiers d’1 Go : vise quelques centaines de Mo max.
                 </div>
             </div>
 
             <div class="side-card">
                 <div class="side-title" data-i18n="side.info.title">Bon à savoir</div>
                 <div class="muted" data-i18n="side.info.text">
-                    - Plus la compression est forte, plus la qualité baisse légèrement.<br>
-                    - Sur les vidéos très longues, la conversion peut prendre du temps.<br>
-                    - Tu peux toujours relancer avec un autre niveau de compression.
+                    - Plus la compression est forte, plus la qualité visuelle baisse un peu.<br>
+                    - Les GIFs sont volontairement limités pour rester légers.<br>
+                    - Sur les vidéos longues, le traitement peut prendre du temps.
                 </div>
                 <div class="legal" data-i18n="side.info.legal">
                     N’envoie que des fichiers dont tu possèdes les droits ou l’autorisation de traitement.
@@ -708,14 +824,14 @@
             <div class="side-card">
                 <div class="side-title" data-i18n="side.about.title">À propos de FluxConvert</div>
                 <div class="muted" data-i18n="side.about.text">
-                    FluxConvert est un outil simple pensé pour les créateurs et utilisateurs qui veulent convertir et alléger leurs fichiers sans prise de tête. Aucune inscription, juste un fichier à l’entrée et un fichier prêt à l’emploi à la sortie.
+                    FluxConvert est un petit outil pensé pour les créateurs et utilisateurs qui veulent gérer leurs fichiers sans se prendre la tête : conversion simple, compression, audio-only, GIF et découpe, le tout sans inscription.
                 </div>
                 <div class="muted" style="margin-top:6px;" data-i18n="side.about.faqIntro">
                     FAQ rapide :
                 </div>
                 <ul style="margin:4px 0 0 16px; padding:0; list-style:disc;">
                     <li data-i18n="side.about.q1">Est-ce que c’est payant ? – Non, la version actuelle est 100% gratuite.</li>
-                    <li data-i18n="side.about.q2">Mes fichiers sont-ils stockés ? – Ils sont traités côté serveur puis supprimés après conversion.</li>
+                    <li data-i18n="side.about.q2">Mes fichiers sont-ils stockés longtemps ? – Ils sont traités côté serveur puis supprimés après conversion.</li>
                 </ul>
             </div>
         </aside>
@@ -723,7 +839,7 @@
 
     <footer class="footer">
         <div class="footer-left">
-            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.1 beta – en cours d’amélioration</span>
+            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.2 beta – UX & outils en cours d’amélioration</span>
         </div>
         <div class="footer-links">
             <span class="footer-link" data-i18n="footer.link.about">À propos</span>
@@ -748,23 +864,42 @@
         const themeToggleLabel = document.getElementById('theme-toggle-label');
         const rootBody = document.body;
         const langSelect = document.getElementById('lang-select');
+        const errorBox = document.getElementById('error-box');
+        const modeTabs = document.querySelectorAll('.mode-tab');
+        const operationInput = document.getElementById('operation');
+        const timeWrapper = document.getElementById('time-wrapper');
+        const durationGroup = document.getElementById('duration-group');
+        const endTimeGroup = document.getElementById('end_time-group');
+        const startTimeInput = document.getElementById('start_time');
+        const durationInput = document.getElementById('duration');
+        const endTimeInput = document.getElementById('end_time');
+        const targetFormatSelect = document.getElementById('target_format');
+        const qualitySelect = document.getElementById('quality');
+
+        const MAX_FILE_MB = 500;
+        let currentMode = 'convert';
 
         const translations = {
             fr: {
-                "header.title": "FluxConvert – Convertisseur & compresseur en ligne",
-                "header.subtitle": "Convertis et allège tes vidéos en quelques clics, sans inscription.",
+                "header.title": "FluxConvert – Convertisseur & outils vidéo",
+                "header.subtitle": "Convertis, compresse, découpe ou transforme tes vidéos en quelques clics.",
                 "header.badge": "⚡ 100% gratuit • tourne côté serveur",
                 "header.themeDark": "Mode sombre",
                 "header.themeLight": "Mode clair",
                 "lang.auto": "Auto",
-                "main.title": "Fichier à transformer",
-                "main.subtitle": "3 étapes : choisis ton fichier → sélectionne le format et la qualité → récupère le fichier final.",
+                "main.title": "Tes outils vidéo en un seul endroit",
+                "main.subtitle": "Choisis un mode : convertir, compresser, extraire l’audio, créer un GIF ou couper un extrait.",
+                "modes.convert": "Convertir",
+                "modes.compress": "Compresser",
+                "modes.audio": "Extraire l’audio",
+                "modes.gif": "Créer un GIF",
+                "modes.cut": "Couper un extrait",
                 "steps.1.title": "Choisis ton fichier",
                 "steps.1.text": "Vidéo ou audio, jusqu’à quelques centaines de Mo.",
-                "steps.2.title": "Format & qualité",
-                "steps.2.text": "MP4, MP3, MOV… compression légère ou forte.",
-                "steps.3.title": "Télécharge",
-                "steps.3.text": "Le fichier transformé est prêt en un clic.",
+                "steps.2.title": "Sélectionne l’outil",
+                "steps.2.text": "Convertir, compresser, extraire l’audio, GIF ou cut.",
+                "steps.3.title": "Télécharge le résultat",
+                "steps.3.text": "Ton fichier optimisé est prêt en un clic.",
                 "drop.title": "Dépose ton fichier ici",
                 "drop.subtitle": "ou clique pour le sélectionner",
                 "drop.help": "Formats vidéo/audio classiques (MP4, MOV, MKV, MP3, WAV…)",
@@ -778,48 +913,62 @@
                 "form.quality.standard": "Standard (qualité normale)",
                 "form.quality.light": "Légère compression (poids réduit)",
                 "form.quality.strong": "Forte compression (poids minimal)",
-                "button.convert": "Convertir le fichier",
+                "time.hint": "Pour les modes GIF et Cut : indique un début (en secondes) et soit une durée, soit une fin.",
+                "time.start": "Début (secondes)",
+                "time.duration": "Durée (secondes)",
+                "time.end": "Fin (secondes)",
+                "button.convert": "Lancer l’outil",
                 "button.sub": "La conversion s’exécute côté serveur, garde l’onglet ouvert.",
-                "status.ready": "Prêt à convertir.",
-                "status.running": "Conversion en cours… ne ferme pas cette page.",
-                "hint.text": "Astuce : commence par une petite vidéo pour voir la taille finale avec chaque niveau de compression.",
-                "side.profile.title": "Profil de sortie conseillé",
-                "side.profile.subtitle": "Pour TikTok / Reels / Shorts :",
-                "side.profile.li1": "Format : <strong>MP4</strong>",
-                "side.profile.li2": "Qualité : <strong>“Légère compression”</strong>",
-                "side.profile.li3": "Résultat : fichier léger, compatible partout.",
+                "status.ready": "Prêt à traiter un fichier.",
+                "status.running": "Traitement en cours… ne ferme pas cette page.",
+                "hint.text": "Astuce : commence par une petite vidéo pour voir le rendu avant d’envoyer un gros fichier.",
+                "side.profile.title": "Profils rapides",
+                "side.profile.convertTitle": "Convertir simplement :",
+                "side.profile.convert1": "Mode : Convertir · Format : MP4",
+                "side.profile.convert2": "Parfait pour une lecture universelle.",
+                "side.profile.socialTitle": "Pour TikTok / Reels / Shorts :",
+                "side.profile.social1": "Mode : Compresser · Format : MP4",
+                "side.profile.social2": "Qualité : Légère compression.",
+                "side.profile.gifTitle": "GIF courts :",
+                "side.profile.gif1": "Mode : GIF · Début + durée (5–10s max).",
                 "side.profile.pill1": "🔁 Conversion serveur",
                 "side.profile.pill2": "🎬 MP4, MOV, MKV",
                 "side.profile.pill3": "🎧 MP3, WAV",
-                "side.profile.limit": "Évite d’envoyer des fichiers d’1 Go : commence plutôt par quelques centaines de Mo max.",
+                "side.profile.pill4": "🎞️ GIF courts",
+                "side.profile.limit": "Évite d’envoyer des fichiers d’1 Go : vise quelques centaines de Mo max.",
                 "side.info.title": "Bon à savoir",
-                "side.info.text": "- Plus la compression est forte, plus la qualité baisse légèrement.<br>- Sur les vidéos très longues, la conversion peut prendre du temps.<br>- Tu peux toujours relancer avec un autre niveau de compression.",
+                "side.info.text": "- Plus la compression est forte, plus la qualité visuelle baisse un peu.<br>- Les GIFs sont volontairement limités pour rester légers.<br>- Sur les vidéos longues, le traitement peut prendre du temps.",
                 "side.info.legal": "N’envoie que des fichiers dont tu possèdes les droits ou l’autorisation de traitement.",
                 "side.about.title": "À propos de FluxConvert",
-                "side.about.text": "FluxConvert est un outil simple pensé pour les créateurs et utilisateurs qui veulent convertir et alléger leurs fichiers sans prise de tête. Aucune inscription, juste un fichier à l’entrée et un fichier prêt à l’emploi à la sortie.",
+                "side.about.text": "FluxConvert est un petit outil pensé pour les créateurs et utilisateurs qui veulent gérer leurs fichiers sans se prendre la tête : conversion simple, compression, audio-only, GIF et découpe, le tout sans inscription.",
                 "side.about.faqIntro": "FAQ rapide :",
                 "side.about.q1": "Est-ce que c’est payant ? – Non, la version actuelle est 100% gratuite.",
-                "side.about.q2": "Mes fichiers sont-ils stockés ? – Ils sont traités côté serveur puis supprimés après conversion.",
-                "footer.version": "v0.1 beta – en cours d’amélioration",
+                "side.about.q2": "Mes fichiers sont-ils stockés longtemps ? – Ils sont traités côté serveur puis supprimés après conversion.",
+                "footer.version": "v0.2 beta – UX & outils en cours d’amélioration",
                 "footer.link.about": "À propos",
                 "footer.link.faq": "FAQ",
                 "footer.link.contact": "Contact (bientôt)"
             },
             en: {
-                "header.title": "FluxConvert – Online Converter & Compressor",
-                "header.subtitle": "Convert and shrink your videos in a few clicks, no signup required.",
+                "header.title": "FluxConvert – Video tools & converter",
+                "header.subtitle": "Convert, compress, cut or transform your videos in just a few clicks.",
                 "header.badge": "⚡ 100% free • runs on the server",
                 "header.themeDark": "Dark mode",
                 "header.themeLight": "Light mode",
                 "lang.auto": "Auto",
-                "main.title": "File to process",
-                "main.subtitle": "3 steps: pick your file → choose format and quality → download the final file.",
+                "main.title": "Your video tools in one place",
+                "main.subtitle": "Pick a mode: convert, compress, extract audio, create a GIF or cut a clip.",
+                "modes.convert": "Convert",
+                "modes.compress": "Compress",
+                "modes.audio": "Extract audio",
+                "modes.gif": "Create GIF",
+                "modes.cut": "Cut clip",
                 "steps.1.title": "Pick your file",
                 "steps.1.text": "Video or audio, up to a few hundred MB.",
-                "steps.2.title": "Format & quality",
-                "steps.2.text": "MP4, MP3, MOV… light or strong compression.",
-                "steps.3.title": "Download",
-                "steps.3.text": "Your converted file is ready in one click.",
+                "steps.2.title": "Choose your tool",
+                "steps.2.text": "Convert, compress, audio-only, GIF or cut.",
+                "steps.3.title": "Download the result",
+                "steps.3.text": "Your processed file is ready in one click.",
                 "drop.title": "Drop your file here",
                 "drop.subtitle": "or click to browse",
                 "drop.help": "Common video/audio formats (MP4, MOV, MKV, MP3, WAV…)",
@@ -833,123 +982,47 @@
                 "form.quality.standard": "Standard (normal quality)",
                 "form.quality.light": "Light compression (smaller size)",
                 "form.quality.strong": "Strong compression (minimal size)",
-                "button.convert": "Convert file",
-                "button.sub": "Conversion runs on the server, keep this tab open.",
-                "status.ready": "Ready to convert.",
-                "status.running": "Converting… don’t close this page.",
-                "hint.text": "Tip: start with a small video to see the final size with each compression level.",
-                "side.profile.title": "Recommended output profile",
-                "side.profile.subtitle": "For TikTok / Reels / Shorts:",
-                "side.profile.li1": "Format: <strong>MP4</strong>",
-                "side.profile.li2": "Quality: <strong>“Light compression”</strong>",
-                "side.profile.li3": "Result: small file, compatible everywhere.",
-                "side.profile.pill1": "🔁 Server-side conversion",
+                "time.hint": "For GIF and Cut modes: set a start (in seconds) and either a duration or an end.",
+                "time.start": "Start (seconds)",
+                "time.duration": "Duration (seconds)",
+                "time.end": "End (seconds)",
+                "button.convert": "Run the tool",
+                "button.sub": "Processing runs on the server, keep this tab open.",
+                "status.ready": "Ready to process a file.",
+                "status.running": "Processing… don’t close this page.",
+                "hint.text": "Tip: start with a small video to preview the result before sending a large file.",
+                "side.profile.title": "Quick profiles",
+                "side.profile.convertTitle": "Simple convert:",
+                "side.profile.convert1": "Mode: Convert · Format: MP4",
+                "side.profile.convert2": "Perfect for universal playback.",
+                "side.profile.socialTitle": "For TikTok / Reels / Shorts:",
+                "side.profile.social1": "Mode: Compress · Format: MP4",
+                "side.profile.social2": "Quality: Light compression.",
+                "side.profile.gifTitle": "Short GIFs:",
+                "side.profile.gif1": "Mode: GIF · Start + duration (5–10s max).",
+                "side.profile.pill1": "🔁 Server-side processing",
                 "side.profile.pill2": "🎬 MP4, MOV, MKV",
                 "side.profile.pill3": "🎧 MP3, WAV",
-                "side.profile.limit": "Avoid uploading 1 GB files: start with a few hundred MB max.",
+                "side.profile.pill4": "🎞️ Short GIFs",
+                "side.profile.limit": "Avoid 1 GB files: aim for a few hundred MB max.",
                 "side.info.title": "Good to know",
-                "side.info.text": "- The stronger the compression, the more quality you lose slightly.<br>- Very long videos can take some time to process.<br>- You can always rerun with a different compression level.",
+                "side.info.text": "- Strong compression slightly lowers visual quality.<br>- GIFs are intentionally limited to stay small.<br>- Long videos can take some time to process.",
                 "side.info.legal": "Only upload files you own or are allowed to process.",
                 "side.about.title": "About FluxConvert",
-                "side.about.text": "FluxConvert is a simple tool built for creators and everyday users who want to convert and shrink their files without hassle. No signup, just a file in and a ready-to-use file out.",
+                "side.about.text": "FluxConvert is a small tool for creators and everyday users who want to manage their files without friction: simple conversion, compression, audio-only, GIFs and cutting, all without signup.",
                 "side.about.faqIntro": "Quick FAQ:",
                 "side.about.q1": "Is it paid? – No, the current version is 100% free.",
-                "side.about.q2": "Are my files stored? – They are processed server-side then removed after conversion.",
-                "footer.version": "v0.1 beta – actively improving",
+                "side.about.q2": "Are my files stored for long? – They are processed server-side then removed after conversion.",
+                "footer.version": "v0.2 beta – UX & tools actively improving",
                 "footer.link.about": "About",
                 "footer.link.faq": "FAQ",
                 "footer.link.contact": "Contact (soon)"
             }
         };
 
-        function updateFilename() {
-            const file = fileInput.files[0];
-            if (file) {
-                filenameEl.style.display = 'inline-block';
-                filenameEl.textContent =
-                    file.name + ' • ' +
-                    Math.round(file.size / 1024 / 1024 * 10) / 10 + ' Mo';
-            } else {
-                filenameEl.style.display = 'none';
-                filenameEl.textContent = '';
-            }
-        }
-
-        dropzone.addEventListener('click', () => fileInput.click());
-
-        dropzone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropzone.classList.add('dragover');
-        });
-
-        dropzone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-        });
-
-        dropzone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropzone.classList.remove('dragover');
-            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                updateFilename();
-            }
-        });
-
-        fileInput.addEventListener('change', updateFilename);
-
-        form.addEventListener('submit', () => {
-            if (!fileInput.files[0]) {
-                return;
-            }
-            btn.disabled = true;
-            statusDot.classList.add('busy');
-            const lang = getCurrentLang();
-            const dict = translations[lang] || translations.en;
-            statusText.textContent = dict["status.running"];
-            btnSub.textContent =
-                lang === 'fr'
-                    ? "La conversion peut prendre un peu de temps selon la taille du fichier."
-                    : "Conversion time depends on the size of your file.";
-        });
-
-        // Thème (dark / light)
-        function applyTheme(theme) {
-            rootBody.setAttribute('data-theme', theme);
-            const lang = getCurrentLang();
-            const t = translations[lang];
-            if (theme === 'dark') {
-                themeToggleIcon.textContent = '🌙';
-                themeToggleLabel.textContent = t["header.themeDark"];
-            } else {
-                themeToggleIcon.textContent = '☀️';
-                themeToggleLabel.textContent = t["header.themeLight"];
-            }
-            localStorage.setItem('vc-theme', theme);
-        }
-
-        function initTheme() {
-            const stored = localStorage.getItem('vc-theme');
-            if (stored === 'light' || stored === 'dark') {
-                applyTheme(stored);
-            } else {
-                const prefersLight = window.matchMedia &&
-                    window.matchMedia('(prefers-color-scheme: light)').matches;
-                applyTheme(prefersLight ? 'light' : 'dark');
-            }
-        }
-
-        themeToggleBtn.addEventListener('click', () => {
-            const current = rootBody.getAttribute('data-theme') || 'dark';
-            const next = current === 'dark' ? 'light' : 'dark';
-            applyTheme(next);
-        });
-
-        // Langue
         function detectBrowserLang() {
             const navLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
             if (navLang.startsWith('fr')) return 'fr';
-            // tout le reste → anglais
             return 'en';
         }
 
@@ -988,6 +1061,10 @@
             // status & bouton sub
             statusText.textContent = dict["status.ready"];
             btnSub.textContent = dict["button.sub"];
+            btn.disabled = false;
+            statusDot.classList.remove('busy');
+            errorBox.style.display = 'none';
+            errorBox.textContent = '';
         }
 
         function initLang() {
@@ -1014,9 +1091,231 @@
             }
         });
 
+        function applyTheme(theme) {
+            rootBody.setAttribute('data-theme', theme);
+            const lang = getCurrentLang();
+            const dict = translations[lang] || translations.en;
+            if (theme === 'dark') {
+                themeToggleIcon.textContent = '🌙';
+                themeToggleLabel.textContent = dict["header.themeDark"];
+            } else {
+                themeToggleIcon.textContent = '☀️';
+                themeToggleLabel.textContent = dict["header.themeLight"];
+            }
+            localStorage.setItem('vc-theme', theme);
+        }
+
+        function initTheme() {
+            const stored = localStorage.getItem('vc-theme');
+            if (stored === 'light' || stored === 'dark') {
+                applyTheme(stored);
+            } else {
+                const prefersLight = window.matchMedia &&
+                    window.matchMedia('(prefers-color-scheme: light)').matches;
+                applyTheme(prefersLight ? 'light' : 'dark');
+            }
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const current = rootBody.getAttribute('data-theme') || 'dark';
+            const next = current === 'dark' ? 'light' : 'dark';
+            applyTheme(next);
+        });
+
+        function updateFilename() {
+            const file = fileInput.files[0];
+            errorBox.style.display = 'none';
+            errorBox.textContent = '';
+
+            if (file) {
+                const sizeMB = file.size / 1024 / 1024;
+                const sizeRounded = Math.round(sizeMB * 10) / 10;
+
+                filenameEl.style.display = 'inline-block';
+                filenameEl.textContent = file.name + ' • ' + sizeRounded + ' Mo';
+
+                if (sizeMB > MAX_FILE_MB) {
+                    const lang = getCurrentLang();
+                    errorBox.style.display = 'block';
+                    errorBox.textContent =
+                        lang === 'fr'
+                            ? `Ton fichier fait ${sizeRounded} Mo. La limite actuelle est d'environ ${MAX_FILE_MB} Mo.`
+                            : `Your file is ${sizeRounded} MB. The current limit is about ${MAX_FILE_MB} MB.`;
+
+                    btn.disabled = true;
+                    statusDot.classList.remove('busy');
+                    statusText.textContent =
+                        lang === 'fr'
+                            ? "Fichier trop volumineux."
+                            : "File is too large.";
+                } else {
+                    btn.disabled = false;
+                    const lang = getCurrentLang();
+                    const dict = translations[lang] || translations.en;
+                    statusDot.classList.remove('busy');
+                    statusText.textContent = dict["status.ready"];
+                }
+            } else {
+                filenameEl.style.display = 'none';
+                filenameEl.textContent = '';
+                btn.disabled = false;
+            }
+        }
+
+        dropzone.addEventListener('click', () => fileInput.click());
+
+        dropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropzone.classList.add('dragover');
+        });
+
+        dropzone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+        });
+
+        dropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropzone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                updateFilename();
+            }
+        });
+
+        fileInput.addEventListener('change', updateFilename);
+
+        // Gestion des modes (convert / compress / audio / gif / cut)
+        function setMode(mode) {
+            currentMode = mode;
+            modeTabs.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+
+            // Définir l'opération envoyée au backend
+            if (mode === 'compress') {
+                operationInput.value = 'compress';
+            } else if (mode === 'audio') {
+                operationInput.value = 'audio';
+            } else if (mode === 'gif') {
+                operationInput.value = 'gif';
+            } else if (mode === 'cut') {
+                operationInput.value = 'cut';
+            } else {
+                operationInput.value = 'convert';
+            }
+
+            // Gérer les champs temps
+            if (mode === 'gif') {
+                timeWrapper.style.display = 'block';
+                durationGroup.style.display = 'block';
+                endTimeGroup.style.display = 'none';
+            } else if (mode === 'cut') {
+                timeWrapper.style.display = 'block';
+                durationGroup.style.display = 'none';
+                endTimeGroup.style.display = 'block';
+            } else {
+                timeWrapper.style.display = 'none';
+            }
+
+            // Réglages par défaut selon le mode
+            if (mode === 'audio') {
+                targetFormatSelect.value = 'mp3';
+            } else if (mode === 'convert') {
+                targetFormatSelect.value = 'mp4';
+                qualitySelect.value = 'standard';
+            } else if (mode === 'compress') {
+                targetFormatSelect.value = 'mp4';
+                qualitySelect.value = 'light';
+            }
+
+            startTimeInput.value = '';
+            durationInput.value = '';
+            endTimeInput.value = '';
+
+            const lang = getCurrentLang();
+            const dict = translations[lang] || translations.en;
+            statusText.textContent = dict["status.ready"];
+            errorBox.style.display = 'none';
+            errorBox.textContent = '';
+        }
+
+        modeTabs.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const mode = btn.dataset.mode;
+                setMode(mode);
+            });
+        });
+
+        form.addEventListener('submit', (e) => {
+            const file = fileInput.files[0];
+            const lang = getCurrentLang();
+            const dict = translations[lang] || translations.en;
+
+            errorBox.style.display = 'none';
+            errorBox.textContent = '';
+
+            if (!file) {
+                e.preventDefault();
+                errorBox.style.display = 'block';
+                errorBox.textContent =
+                    lang === 'fr'
+                        ? "Ajoute un fichier avant de lancer l’outil."
+                        : "Please add a file before starting the tool.";
+                return;
+            }
+
+            const sizeMB = file.size / 1024 / 1024;
+            if (sizeMB > MAX_FILE_MB) {
+                e.preventDefault();
+                errorBox.style.display = 'block';
+                errorBox.textContent =
+                    lang === 'fr'
+                        ? `Ton fichier est trop volumineux (${Math.round(sizeMB)} Mo). Limite actuelle : ~${MAX_FILE_MB} Mo.`
+                        : `Your file is too large (${Math.round(sizeMB)} MB). Current limit: ~${MAX_FILE_MB} MB.`;
+                return;
+            }
+
+            // Vérifications modes GIF / Cut
+            if (currentMode === 'gif') {
+                const durationVal = durationInput.value.trim();
+                if (!durationVal) {
+                    e.preventDefault();
+                    errorBox.style.display = 'block';
+                    errorBox.textContent =
+                        lang === 'fr'
+                            ? "Pour créer un GIF, indique au moins une durée en secondes."
+                            : "To create a GIF, please set at least a duration (in seconds).";
+                    return;
+                }
+            }
+
+            if (currentMode === 'cut') {
+                const endVal = endTimeInput.value.trim();
+                if (!endVal) {
+                    e.preventDefault();
+                    errorBox.style.display = 'block';
+                    errorBox.textContent =
+                        lang === 'fr'
+                            ? "Pour couper un extrait, indique au moins une fin en secondes."
+                            : "To cut a clip, please set at least an end time (in seconds).";
+                    return;
+                }
+            }
+
+            btn.disabled = true;
+            statusDot.classList.add('busy');
+            statusText.textContent = dict["status.running"];
+            btnSub.textContent =
+                lang === 'fr'
+                    ? "Le temps de traitement dépend de la taille et du mode choisi."
+                    : "Processing time depends on file size and selected mode.";
+        });
+
         // Init
         initLang();
         initTheme();
+        setMode('convert');
     });
 </script>
 </body>
