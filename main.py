@@ -1,4 +1,3 @@
-import os
 import uuid
 import subprocess
 from pathlib import Path
@@ -27,7 +26,10 @@ def build_ffmpeg_command(
     resolution: str | None = None,
     fps: str | None = None,
     audio_bitrate: str | None = None,
+    speed: str | None = None,
+    reverse: bool = False,
 ):
+    """Construit la commande ffmpeg pour toutes les opérations sauf merge."""
     cmd = ["ffmpeg", "-y"]
 
     # Découpage (ss / t / to)
@@ -40,11 +42,16 @@ def build_ffmpeg_command(
         # Audio uniquement
         cmd.append("-vn")
 
+    # Vitesse (parse en float, par défaut 1.0)
+    try:
+        speed_value = float(speed) if speed else 1.0
+    except ValueError:
+        speed_value = 1.0
+
     # Profil qualité vidéo
     vcodec = None
     video_flags = []
     if operation in ("convert", "compress", "gif", "cut"):
-        # H.264 pour la plupart des sorties vidéo
         vcodec = "libx264"
 
         if quality == "light":       # plus léger
@@ -57,7 +64,6 @@ def build_ffmpeg_command(
     # Résolution & FPS (pour la vidéo / GIF)
     vf_parts = []
     if resolution and resolution != "source":
-        # scale=-2:hauteur pour garder le ratio
         if resolution == "480p":
             vf_parts.append("scale=-2:480")
         elif resolution == "720p":
@@ -68,25 +74,44 @@ def build_ffmpeg_command(
     if fps and fps != "source":
         vf_parts.append(f"fps={fps}")
 
+    # Vitesse vidéo (setpts)
+    if speed_value != 1.0 and operation != "audio":
+        # setpts=PTS/speed  →  >1 = plus rapide, <1 = ralenti
+        vf_parts.append(f"setpts=PTS/{speed_value}")
+
+    # Reverse vidéo
+    if reverse and operation != "audio":
+        vf_parts.append("reverse")
+
     if vf_parts and operation != "audio":
         video_flags.extend(["-vf", ",".join(vf_parts)])
 
-    # Bitrate audio
+    # Bitrate + filtres audio
     audio_flags = []
     if audio_bitrate and audio_bitrate != "auto":
         audio_flags.extend(["-b:a", audio_bitrate])
+
+    audio_filter_parts = []
+
+    # Vitesse audio (0.5–2.0 ok pour atempo)
+    if speed_value != 1.0 and operation in ("convert", "compress", "gif", "cut", "audio"):
+        audio_filter_parts.append(f"atempo={speed_value}")
+
+    # Reverse audio
+    if reverse and operation in ("convert", "compress", "gif", "cut", "audio"):
+        audio_filter_parts.append("areverse")
+
+    if audio_filter_parts:
+        audio_flags.extend(["-filter:a", ",".join(audio_filter_parts)])
 
     # Découpage durée
     if duration:
         video_flags.extend(["-t", duration])
     elif end_time and start_time:
-        # -to = temps absolu depuis le début
         video_flags.extend(["-to", end_time])
 
     # Opération GIF spécifique
     if operation == "gif":
-        # Palette pour GIF un peu plus propres
-        # On reste simple pour l’instant
         output_path = output_path.with_suffix(".gif")
         target_format = "gif"
         vcodec = None  # ffmpeg choisira
@@ -98,14 +123,7 @@ def build_ffmpeg_command(
     if audio_flags and operation != "gif":
         cmd.extend(audio_flags)
 
-    # Ajout flags vidéo si présents
     cmd.extend(video_flags)
-
-    # Format audio-only (mp3/wav/flac etc.)
-    if operation == "audio":
-        # Laisser ffmpeg choisir le codec selon l’extension
-        pass
-
     cmd.append(str(output_path))
     return cmd, output_path
 
@@ -124,12 +142,11 @@ def convert():
     if file.filename == "":
         abort(400, "Fichier vide")
 
-    # Champs principaux
     operation = request.form.get("operation", "convert")
     target_format = request.form.get("target_format", "mp4").lower()
     quality = request.form.get("quality", "standard")
 
-    # Options temps
+    # Temps
     start_time = request.form.get("start_time") or None
     duration = request.form.get("duration") or None
     end_time = request.form.get("end_time") or None
@@ -138,21 +155,94 @@ def convert():
     resolution = request.form.get("resolution") or "source"
     fps = request.form.get("fps") or "source"
     audio_bitrate = request.form.get("audio_bitrate") or "auto"
+    speed = request.form.get("speed") or "1.0"
+    reverse = request.form.get("reverse") == "on"
 
-    # Sauvegarde du fichier uploadé
+    # Sauvegarde du fichier 1
     input_ext = Path(file.filename).suffix or f".{target_format}"
     input_name = f"{uuid.uuid4().hex}{input_ext}"
     input_path = UPLOAD_DIR / input_name
     file.save(input_path)
 
-    # Chemin de sortie
-    if operation == "gif":
-        output_ext = ".gif"
-    elif operation == "audio":
-        output_ext = f".{target_format}"
-    else:
-        output_ext = f".{target_format}"
+    # ─────────────────────────────
+    #  CAS FUSION (merge) → 2 fichiers
+    # ─────────────────────────────
+    if operation == "merge":
+        file2 = request.files.get("file2")
+        if file2 is None or file2.filename == "":
+            abort(400, "Deux fichiers sont nécessaires pour la fusion.")
 
+        input2_ext = Path(file2.filename).suffix or f".{target_format}"
+        input2_name = f"{uuid.uuid4().hex}{input2_ext}"
+        input2_path = UPLOAD_DIR / input2_name
+        file2.save(input2_path)
+
+        output_ext = f".{target_format or 'mp4'}"
+        output_name = f"{uuid.uuid4().hex}{output_ext}"
+        output_path = OUTPUT_DIR / output_name
+
+        # Qualité vidéo → CRF / preset
+        crf = "23"
+        preset = "medium"
+        if quality == "light":
+            crf = "26"
+            preset = "veryfast"
+        elif quality == "strong":
+            crf = "30"
+            preset = "faster"
+
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-i", str(input_path),
+            "-i", str(input2_path),
+            "-filter_complex",
+            "[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[v][a]",
+            "-map", "[v]",
+            "-map", "[a]",
+            "-c:v", "libx264",
+            "-crf", crf,
+            "-preset", preset,
+        ]
+
+        # Pour l’instant, vitesse / reverse ne s’appliquent pas sur merge
+        if audio_bitrate and audio_bitrate != "auto":
+            cmd.extend(["-b:a", audio_bitrate])
+
+        try:
+            completed = subprocess.run(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+            )
+
+            if completed.returncode != 0 or not output_path.exists():
+                print("FFmpeg merge error:", completed.stderr)
+                abort(500, "Erreur pendant la fusion des vidéos.")
+
+            return send_file(
+                output_path,
+                as_attachment=True,
+                download_name=output_path.name,
+            )
+
+        finally:
+            try:
+                if input_path.exists():
+                    input_path.unlink()
+            except Exception:
+                pass
+            try:
+                if input2_path.exists():
+                    input2_path.unlink()
+            except Exception:
+                pass
+
+    # ─────────────────────────────
+    #  AUTRES OPÉRATIONS
+    # ─────────────────────────────
+    output_ext = ".gif" if operation == "gif" else f".{target_format}"
     output_name = f"{uuid.uuid4().hex}{output_ext}"
     output_path = OUTPUT_DIR / output_name
 
@@ -169,9 +259,10 @@ def convert():
             resolution=resolution,
             fps=fps,
             audio_bitrate=audio_bitrate,
+            speed=speed,
+            reverse=reverse,
         )
 
-        # Exécution ffmpeg
         completed = subprocess.run(
             cmd,
             stdout=subprocess.PIPE,
@@ -183,7 +274,6 @@ def convert():
             print("FFmpeg error:", completed.stderr)
             abort(500, "Erreur pendant la conversion / compression du fichier.")
 
-        # Téléchargement
         return send_file(
             final_output_path,
             as_attachment=True,
@@ -191,7 +281,6 @@ def convert():
         )
 
     finally:
-        # Nettoyage basique : on garde seulement les outputs
         try:
             if input_path.exists():
                 input_path.unlink()

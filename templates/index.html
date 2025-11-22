@@ -5,10 +5,6 @@
     <title>FluxConvert – Outils vidéo simples & rapides</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        /* mêmes styles que ta version actuelle, avec le bloc advanced déjà inclus
-           + rien de spécial à changer ici, donc je ne re-commente pas chaque ligne
-           (tu peux juste coller ce fichier entier) */
-
         :root {
             --bg: #020617;
             --bg-card: #020617;
@@ -256,6 +252,27 @@
         }
         input[type="file"] { display: none; }
 
+        .secondary-upload {
+            margin-top: 10px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            border: 1px dashed rgba(148,163,184,0.6);
+            background: rgba(15,23,42,0.7);
+            font-size: 0.78rem;
+        }
+        body[data-theme="light"] .secondary-upload {
+            background: #f9fafb;
+        }
+        .secondary-upload label {
+            cursor: pointer;
+            color: var(--accent);
+        }
+        .secondary-filename {
+            margin-top: 4px;
+            font-size: 0.76rem;
+            color: var(--text-soft);
+        }
+
         .advanced { margin-top: 12px; }
         .advanced-toggle {
             width: 100%;
@@ -502,6 +519,10 @@
                     <span class="icon">✂️</span>
                     <span data-i18n="modes.cut">Cut</span>
                 </button>
+                <button class="mode-tab" data-mode="merge">
+                    <span class="icon">➕</span>
+                    <span data-i18n="modes.merge">Fusionner</span>
+                </button>
             </div>
 
             <div class="steps">
@@ -516,7 +537,7 @@
                     <span class="icon">2</span>
                     <div>
                         <strong data-i18n="steps.2.title">Choisis un mode</strong>
-                        <small data-i18n="steps.2.text">Convert, compress, audio, GIF ou cut.</small>
+                        <small data-i18n="steps.2.text">Convert, compress, audio, GIF, cut ou fusion.</small>
                     </div>
                 </div>
                 <div class="step">
@@ -543,6 +564,15 @@
                     <div class="dz-filename" id="dz-filename" style="display:none;"></div>
                     <input type="file" id="file" name="file" required>
                 </label>
+
+                <div class="secondary-upload" id="secondary-upload" style="display:none;">
+                    <div data-i18n="merge.secondary.label">
+                        2ᵉ fichier pour la fusion :
+                        <label for="file2">clique pour le choisir</label>
+                    </div>
+                    <input type="file" id="file2" name="file2" style="display:none;">
+                    <div class="secondary-filename" id="secondary-filename"></div>
+                </div>
 
                 <div class="advanced">
                     <button type="button" class="advanced-toggle" id="advanced-toggle">
@@ -604,6 +634,29 @@
                                     <option value="256k">256 kbps</option>
                                     <option value="320k">320 kbps</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="form-row" style="margin-top:8px;">
+                            <div class="field">
+                                <label for="speed" data-i18n="form.speedLabel">Vitesse</label>
+                                <select id="speed" name="speed">
+                                    <option value="1.0" data-i18n="form.speed.1">Normal (1×)</option>
+                                    <option value="0.5" data-i18n="form.speed.05">Ralenti 0,5×</option>
+                                    <option value="0.75" data-i18n="form.speed.075">Léger ralenti 0,75×</option>
+                                    <option value="1.25" data-i18n="form.speed.125">Un peu plus rapide 1,25×</option>
+                                    <option value="1.5" data-i18n="form.speed.15">Rapide 1,5×</option>
+                                    <option value="2.0" data-i18n="form.speed.2">Très rapide 2×</option>
+                                </select>
+                            </div>
+                            <div class="field">
+                                <label for="reverse" data-i18n="form.reverseLabel">Lecture inversée</label>
+                                <div style="display:flex;align-items:center;gap:6px;">
+                                    <input type="checkbox" id="reverse" name="reverse" style="width:auto;">
+                                    <span style="font-size:0.8rem;" data-i18n="form.reverseHelp">
+                                        Lecture de la fin vers le début.
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -699,7 +752,7 @@
 
     <footer class="footer">
         <div class="footer-left">
-            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.3 beta</span>
+            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.5 beta</span>
         </div>
         <div class="footer-links">
             <span class="footer-link" data-i18n="footer.link.about">À propos</span>
@@ -712,6 +765,9 @@
 <script>
 document.addEventListener("DOMContentLoaded", function () {
     const fileInput = document.getElementById('file');
+    const file2Input = document.getElementById('file2');
+    const secondaryUpload = document.getElementById('secondary-upload');
+    const secondaryFilename = document.getElementById('secondary-filename');
     const dropzone = document.getElementById('dropzone');
     const filenameEl = document.getElementById('dz-filename');
     const form = document.getElementById('convert-form');
@@ -733,12 +789,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const endTimeGroup = document.getElementById('end_time-group');
     const startTimeInput = document.getElementById('start_time');
     const durationInput = document.getElementById('duration');
-    const endTimeInput = document.getElementById('end_time');
+       const endTimeInput = document.getElementById('end_time');
     const targetFormatSelect = document.getElementById('target_format');
     const qualitySelect = document.getElementById('quality');
     const resolutionSelect = document.getElementById('resolution');
     const fpsSelect = document.getElementById('fps');
     const audioBitrateSelect = document.getElementById('audio_bitrate');
+    const speedSelect = document.getElementById('speed');
+    const reverseCheckbox = document.getElementById('reverse');
     const advancedToggle = document.getElementById('advanced-toggle');
     const advancedPanel = document.getElementById('advanced-panel');
     const advancedSummary = document.getElementById('advanced-summary');
@@ -761,10 +819,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "modes.audio": "Audio only",
             "modes.gif": "GIF",
             "modes.cut": "Cut",
+            "modes.merge": "Fusionner",
             "steps.1.title": "Dépose ton fichier",
             "steps.1.text": "Vidéo ou audio.",
             "steps.2.title": "Choisis un mode",
-            "steps.2.text": "Convert, compress, audio, GIF ou cut.",
+            "steps.2.text": "Convert, compress, audio, GIF, cut ou fusion.",
             "steps.3.title": "Télécharge",
             "steps.3.text": "Fichier prêt en un clic.",
             "drop.title": "Glisse ton fichier ici",
@@ -789,6 +848,16 @@ document.addEventListener("DOMContentLoaded", function () {
             "form.fps.source": "Source",
             "form.audioBitrateLabel": "Bitrate audio",
             "form.audioBitrate.auto": "Auto",
+            "form.speedLabel": "Vitesse",
+            "form.speed.1": "Normal (1×)",
+            "form.speed.05": "Ralenti 0,5×",
+            "form.speed.075": "Léger ralenti 0,75×",
+            "form.speed.125": "Un peu plus rapide 1,25×",
+            "form.speed.15": "Rapide 1,5×",
+            "form.speed.2": "Très rapide 2×",
+            "form.reverseLabel": "Lecture inversée",
+            "form.reverseHelp": "Lecture de la fin vers le début.",
+            "merge.secondary.label": "2ᵉ fichier pour la fusion : ",
             "time.hint": "GIF / Cut : indique un début (sec) + une durée ou une fin.",
             "time.start": "Début (s)",
             "time.duration": "Durée (s)",
@@ -798,9 +867,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "button.label.audio": "Extraire l’audio",
             "button.label.gif": "Créer le GIF",
             "button.label.cut": "Couper l’extrait",
+            "button.label.merge": "Fusionner les vidéos",
             "button.sub": "Tout se fait côté serveur. Tu attends, et c’est bon.",
             "status.ready": "Prêt quand toi tu l’es.",
             "status.running": "Traitement en cours…",
+            "summary.reverse": "Reverse",
             "hint.text": "Tip : teste d’abord avec un petit extrait.",
             "side.profile.title": "Presets rapides",
             "side.profile.convertTitle": "Lecture partout :",
@@ -817,7 +888,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "side.info.title": "Infos utiles",
             "side.info.text": "- Plus c’est compressé, plus tu perds un peu de détail.<br>- GIF = petit extrait, pas un film.<br>- Fichiers traités puis supprimés.",
             "side.info.legal": "Envoie uniquement des fichiers que tu as le droit d’utiliser.",
-            "footer.version": "v0.3 beta",
+            "footer.version": "v0.5 beta",
             "footer.link.about": "À propos",
             "footer.link.faq": "FAQ",
             "footer.link.contact": "Contact (bientôt)"
@@ -836,10 +907,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "modes.audio": "Audio only",
             "modes.gif": "GIF",
             "modes.cut": "Cut",
+            "modes.merge": "Merge",
             "steps.1.title": "Drop your file",
             "steps.1.text": "Video or audio.",
             "steps.2.title": "Pick a mode",
-            "steps.2.text": "Convert, compress, audio, GIF or cut.",
+            "steps.2.text": "Convert, compress, audio, GIF, cut or merge.",
             "steps.3.title": "Download",
             "steps.3.text": "File ready in one click.",
             "drop.title": "Drop your file here",
@@ -864,6 +936,16 @@ document.addEventListener("DOMContentLoaded", function () {
             "form.fps.source": "Source",
             "form.audioBitrateLabel": "Audio bitrate",
             "form.audioBitrate.auto": "Auto",
+            "form.speedLabel": "Speed",
+            "form.speed.1": "Normal (1×)",
+            "form.speed.05": "Slow 0.5×",
+            "form.speed.075": "Slight slow 0.75×",
+            "form.speed.125": "Slight fast 1.25×",
+            "form.speed.15": "Fast 1.5×",
+            "form.speed.2": "Very fast 2×",
+            "form.reverseLabel": "Reverse",
+            "form.reverseHelp": "Play from end to start.",
+            "merge.secondary.label": "2nd file to merge: ",
             "time.hint": "GIF / Cut: set a start (sec) + a duration or an end.",
             "time.start": "Start (s)",
             "time.duration": "Duration (s)",
@@ -873,9 +955,11 @@ document.addEventListener("DOMContentLoaded", function () {
             "button.label.audio": "Extract audio",
             "button.label.gif": "Create GIF",
             "button.label.cut": "Cut clip",
+            "button.label.merge": "Merge videos",
             "button.sub": "Processing is done server-side. Just wait.",
             "status.ready": "Ready when you are.",
             "status.running": "Processing…",
+            "summary.reverse": "Reverse",
             "hint.text": "Tip: try with a short clip first.",
             "side.profile.title": "Quick presets",
             "side.profile.convertTitle": "Plays everywhere:",
@@ -892,7 +976,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "side.info.title": "Good to know",
             "side.info.text": "- Stronger compression = less detail.<br>- GIF = small clip, not a movie.<br>- Files processed then removed.",
             "side.info.legal": "Only upload files you’re allowed to use.",
-            "footer.version": "v0.3 beta",
+            "footer.version": "v0.5 beta",
             "footer.link.about": "About",
             "footer.link.faq": "FAQ",
             "footer.link.contact": "Contact (soon)"
@@ -1011,11 +1095,20 @@ document.addEventListener("DOMContentLoaded", function () {
         const resVal = resolutionSelect.value;
         const fpsVal = fpsSelect.value;
         const audioVal = audioBitrateSelect.value;
+        const speedVal = speedSelect.value;
+        const reverseOn = reverseCheckbox.checked;
+        const dict = getDict();
 
         if (currentMode === 'audio') {
             let bits = [formatText];
             if (audioVal && audioVal !== 'auto') {
                 bits.push(audioVal.replace('k', ' kbps'));
+            }
+            if (speedVal && speedVal !== '1.0') {
+                bits.push(speedVal + "×");
+            }
+            if (reverseOn) {
+                bits.push(dict["summary.reverse"] || "Reverse");
             }
             return bits.join(' • ');
         } else {
@@ -1026,6 +1119,12 @@ document.addEventListener("DOMContentLoaded", function () {
             }
             if (fpsVal && fpsVal !== 'source') {
                 segments.push(fpsVal + " fps");
+            }
+            if (speedVal && speedVal !== '1.0') {
+                segments.push(speedVal + "×");
+            }
+            if (reverseOn) {
+                segments.push(dict["summary.reverse"] || "Reverse");
             }
             segments.push(qualityText);
             return segments.join(' • ');
@@ -1041,6 +1140,8 @@ document.addEventListener("DOMContentLoaded", function () {
     resolutionSelect.addEventListener('change', updateAdvancedSummary);
     fpsSelect.addEventListener('change', updateAdvancedSummary);
     audioBitrateSelect.addEventListener('change', updateAdvancedSummary);
+    speedSelect.addEventListener('change', updateAdvancedSummary);
+    reverseCheckbox.addEventListener('change', updateAdvancedSummary);
 
     advancedToggle.addEventListener('click', () => {
         const isOpen = advancedPanel.style.display === 'block';
@@ -1087,6 +1188,17 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
+    function updateFilename2() {
+        const file = file2Input.files[0];
+        if (!file) {
+            secondaryFilename.textContent = "";
+            return;
+        }
+        const sizeMB = file.size / 1024 / 1024;
+        const sizeRounded = Math.round(sizeMB * 10) / 10;
+        secondaryFilename.textContent = file.name + " • " + sizeRounded + " Mo";
+    }
+
     dropzone.addEventListener('click', () => fileInput.click());
 
     dropzone.addEventListener('dragover', (e) => {
@@ -1109,6 +1221,13 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 
     fileInput.addEventListener('change', updateFilename);
+    file2Input.addEventListener('change', updateFilename2);
+
+    secondaryUpload.addEventListener('click', () => {
+        if (currentMode === 'merge') {
+            file2Input.click();
+        }
+    });
 
     function updateButtonLabel() {
         const dict = getDict();
@@ -1134,6 +1253,8 @@ document.addEventListener("DOMContentLoaded", function () {
             operationInput.value = 'gif';
         } else if (mode === 'cut') {
             operationInput.value = 'cut';
+        } else if (mode === 'merge') {
+            operationInput.value = 'merge';
         } else {
             operationInput.value = 'convert';
         }
@@ -1164,6 +1285,19 @@ document.addEventListener("DOMContentLoaded", function () {
             resolutionSelect.value = '720p';
             fpsSelect.value = '30';
         }
+
+        // Zone 2ᵉ fichier
+        if (mode === 'merge') {
+            secondaryUpload.style.display = 'block';
+        } else {
+            secondaryUpload.style.display = 'none';
+            secondaryFilename.textContent = "";
+            file2Input.value = "";
+        }
+
+        // Reset vitesse + reverse
+        speedSelect.value = "1.0";
+        reverseCheckbox.checked = false;
 
         startTimeInput.value = '';
         durationInput.value = '';
@@ -1201,6 +1335,19 @@ document.addEventListener("DOMContentLoaded", function () {
                     ? "Ajoute un fichier avant de lancer."
                     : "Please add a file first.";
             return;
+        }
+
+        if (currentMode === 'merge') {
+            const file2 = file2Input.files[0];
+            if (!file2) {
+                e.preventDefault();
+                errorBox.style.display = 'block';
+                errorBox.textContent =
+                    lang === 'fr'
+                        ? "Pour fusionner, ajoute aussi un 2ᵉ fichier."
+                        : "For merge, please add a second file.";
+                return;
+            }
         }
 
         const sizeMB = file.size / 1024 / 1024;
