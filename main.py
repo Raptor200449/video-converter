@@ -1,133 +1,203 @@
-from fastapi import FastAPI, UploadFile, File, Form, Request
-from fastapi.responses import FileResponse, HTMLResponse
-from fastapi.templating import Jinja2Templates
-import subprocess
-import uuid
 import os
+import uuid
+import subprocess
+from pathlib import Path
 
-app = FastAPI()
+from flask import Flask, render_template, request, send_file, abort
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_DIR = os.path.join(BASE_DIR, "uploads")
-OUTPUT_DIR = os.path.join(BASE_DIR, "outputs")
+app = Flask(__name__)
 
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+BASE_DIR = Path(__file__).resolve().parent
+UPLOAD_DIR = BASE_DIR / "uploads"
+OUTPUT_DIR = BASE_DIR / "outputs"
 
-templates = Jinja2Templates(directory="templates")
-
-
-@app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+UPLOAD_DIR.mkdir(exist_ok=True)
+OUTPUT_DIR.mkdir(exist_ok=True)
 
 
-@app.post("/convert")
-async def convert_file(
-    request: Request,
-    file: UploadFile = File(...),
-    target_format: str = Form(...),
-    quality: str = Form("standard"),
-    operation: str = Form("convert"),
-    start_time: str = Form("", description="Start time in seconds (for gif/cut)"),
-    end_time: str = Form("", description="End time in seconds (for cut)"),
-    duration: str = Form("", description="Duration in seconds (for gif)"),
+def build_ffmpeg_command(
+    input_path: Path,
+    output_path: Path,
+    operation: str,
+    target_format: str,
+    quality: str,
+    start_time: str | None = None,
+    duration: str | None = None,
+    end_time: str | None = None,
+    resolution: str | None = None,
+    fps: str | None = None,
+    audio_bitrate: str | None = None,
 ):
-    """
-    operation :
-      - convert  : conversion simple
-      - compress : conversion orientée poids réduit
-      - audio    : extraire uniquement l'audio
-      - gif      : créer un GIF (start_time + duration)
-      - cut      : couper un extrait (start_time + end_time)
-    """
-    input_id = str(uuid.uuid4())
-    output_id = str(uuid.uuid4())
+    cmd = ["ffmpeg", "-y"]
 
-    input_path = os.path.join(UPLOAD_DIR, f"{input_id}_{file.filename}")
+    # Découpage (ss / t / to)
+    if start_time:
+        cmd.extend(["-ss", start_time])
 
-    # Forcer le format de sortie pour certains modes
+    cmd.extend(["-i", str(input_path)])
+
+    if operation == "audio":
+        # Audio uniquement
+        cmd.append("-vn")
+
+    # Profil qualité vidéo
+    vcodec = None
+    video_flags = []
+    if operation in ("convert", "compress", "gif", "cut"):
+        # H.264 pour la plupart des sorties vidéo
+        vcodec = "libx264"
+
+        if quality == "light":       # plus léger
+            video_flags.extend(["-crf", "26", "-preset", "veryfast"])
+        elif quality == "strong":    # très compressé
+            video_flags.extend(["-crf", "30", "-preset", "faster"])
+        else:                        # standard
+            video_flags.extend(["-crf", "23", "-preset", "medium"])
+
+    # Résolution & FPS (pour la vidéo / GIF)
+    vf_parts = []
+    if resolution and resolution != "source":
+        # scale=-2:hauteur pour garder le ratio
+        if resolution == "480p":
+            vf_parts.append("scale=-2:480")
+        elif resolution == "720p":
+            vf_parts.append("scale=-2:720")
+        elif resolution == "1080p":
+            vf_parts.append("scale=-2:1080")
+
+    if fps and fps != "source":
+        vf_parts.append(f"fps={fps}")
+
+    if vf_parts and operation != "audio":
+        video_flags.extend(["-vf", ",".join(vf_parts)])
+
+    # Bitrate audio
+    audio_flags = []
+    if audio_bitrate and audio_bitrate != "auto":
+        audio_flags.extend(["-b:a", audio_bitrate])
+
+    # Découpage durée
+    if duration:
+        video_flags.extend(["-t", duration])
+    elif end_time and start_time:
+        # -to = temps absolu depuis le début
+        video_flags.extend(["-to", end_time])
+
+    # Opération GIF spécifique
     if operation == "gif":
-        output_ext = "gif"
-    else:
-        output_ext = target_format.lower()
+        # Palette pour GIF un peu plus propres
+        # On reste simple pour l’instant
+        output_path = output_path.with_suffix(".gif")
+        target_format = "gif"
+        vcodec = None  # ffmpeg choisira
 
-    output_filename = f"{output_id}.{output_ext}"
-    output_path = os.path.join(OUTPUT_DIR, output_filename)
+    # Construction finale des flags codecs
+    if vcodec and operation != "audio":
+        cmd.extend(["-c:v", vcodec])
 
-    # Sauvegarder le fichier uploadé
-    with open(input_path, "wb") as f:
-        content = await file.read()
-        f.write(content)
+    if audio_flags and operation != "gif":
+        cmd.extend(audio_flags)
 
-    # Normaliser les champs temps (vides -> None)
-    start_time = (start_time or "").strip() or None
-    end_time = (end_time or "").strip() or None
-    duration = (duration or "").strip() or None
+    # Ajout flags vidéo si présents
+    cmd.extend(video_flags)
 
-    video_formats = {"mp4", "mkv", "mov"}
+    # Format audio-only (mp3/wav/flac etc.)
+    if operation == "audio":
+        # Laisser ffmpeg choisir le codec selon l’extension
+        pass
 
-    # Construire la commande ffmpeg selon l'opération
+    cmd.append(str(output_path))
+    return cmd, output_path
+
+
+@app.route("/", methods=["GET"])
+def index():
+    return render_template("index.html")
+
+
+@app.route("/convert", methods=["POST"])
+def convert():
+    if "file" not in request.files:
+        abort(400, "Aucun fichier reçu")
+
+    file = request.files["file"]
+    if file.filename == "":
+        abort(400, "Fichier vide")
+
+    # Champs principaux
+    operation = request.form.get("operation", "convert")
+    target_format = request.form.get("target_format", "mp4").lower()
+    quality = request.form.get("quality", "standard")
+
+    # Options temps
+    start_time = request.form.get("start_time") or None
+    duration = request.form.get("duration") or None
+    end_time = request.form.get("end_time") or None
+
+    # Options avancées
+    resolution = request.form.get("resolution") or "source"
+    fps = request.form.get("fps") or "source"
+    audio_bitrate = request.form.get("audio_bitrate") or "auto"
+
+    # Sauvegarde du fichier uploadé
+    input_ext = Path(file.filename).suffix or f".{target_format}"
+    input_name = f"{uuid.uuid4().hex}{input_ext}"
+    input_path = UPLOAD_DIR / input_name
+    file.save(input_path)
+
+    # Chemin de sortie
     if operation == "gif":
-        # GIF animé, fps réduit + scale pour limiter le poids
-        cmd = ["ffmpeg", "-y"]
-        if start_time:
-            cmd += ["-ss", start_time]
-        if duration:
-            cmd += ["-t", duration]
-        cmd += [
-            "-i",
-            input_path,
-            "-vf",
-            "fps=12,scale=640:-1:flags=lanczos",
-            "-loop",
-            "0",
-            output_path,
-        ]
-
-    elif operation == "cut":
-        cmd = ["ffmpeg", "-y"]
-        if start_time:
-            cmd += ["-ss", start_time]
-        if end_time:
-            cmd += ["-to", end_time]
-        cmd += ["-i", input_path, output_path]
-
+        output_ext = ".gif"
     elif operation == "audio":
-        # Forcer un format audio cohérent si nécessaire
-        if output_ext not in {"mp3", "wav"}:
-            output_ext = "mp3"
-            output_filename = f"{output_id}.{output_ext}"
-            output_path = os.path.join(OUTPUT_DIR, output_filename)
-        cmd = [
-            "ffmpeg",
-            "-y",
-            "-i",
-            input_path,
-            "-vn",  # no video
-            output_path,
-        ]
-
+        output_ext = f".{target_format}"
     else:
-        # convert / compress par défaut, avec gestion de la qualité vidéo
-        cmd = ["ffmpeg", "-y", "-i", input_path]
+        output_ext = f".{target_format}"
 
-        if output_ext in video_formats:
-            if quality == "light":
-                cmd += ["-vcodec", "libx264", "-crf", "26"]
-            elif quality == "strong":
-                cmd += ["-vcodec", "libx264", "-crf", "30"]
+    output_name = f"{uuid.uuid4().hex}{output_ext}"
+    output_path = OUTPUT_DIR / output_name
 
-        cmd.append(output_path)
+    try:
+        cmd, final_output_path = build_ffmpeg_command(
+            input_path=input_path,
+            output_path=output_path,
+            operation=operation,
+            target_format=target_format,
+            quality=quality,
+            start_time=start_time,
+            duration=duration,
+            end_time=end_time,
+            resolution=resolution,
+            fps=fps,
+            audio_bitrate=audio_bitrate,
+        )
 
-    # Lancer la conversion
-    process = subprocess.run(
-        cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True
-    )
-    # Si besoin de debug : print(process.stderr)
+        # Exécution ffmpeg
+        completed = subprocess.run(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
 
-    return FileResponse(
-        output_path,
-        media_type="application/octet-stream",
-        filename=output_filename,
-    )
+        if completed.returncode != 0 or not final_output_path.exists():
+            print("FFmpeg error:", completed.stderr)
+            abort(500, "Erreur pendant la conversion / compression du fichier.")
+
+        # Téléchargement
+        return send_file(
+            final_output_path,
+            as_attachment=True,
+            download_name=final_output_path.name,
+        )
+
+    finally:
+        # Nettoyage basique : on garde seulement les outputs
+        try:
+            if input_path.exists():
+                input_path.unlink()
+        except Exception:
+            pass
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
