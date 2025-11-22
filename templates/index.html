@@ -463,14 +463,16 @@
         .footer-link:hover { text-decoration: underline; }
     </style>
 </head>
-<body data-theme="dark">
+<body data-theme="dark"
+      data-preset-mode="{{ preset_mode|default('', true) }}"
+      data-preset-format="{{ preset_format|default('', true) }}">
 <div class="shell">
     <header class="header">
         <div class="brand">
             <div class="logo">FC</div>
             <div class="title-block">
                 <h1 data-i18n="header.title">FluxConvert – Outils vidéo simples & rapides</h1>
-                <p data-i18n="header.subtitle">Dépose un fichier, choisis un mode, récupère le résultat. C’est tout.</p>
+                <p data-i18n="header.subtitle">Dépose un fichier, choisis un mode, récupère le résultat.</p>
             </div>
         </div>
         <div class="header-right">
@@ -752,7 +754,7 @@
 
     <footer class="footer">
         <div class="footer-left">
-            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.5 beta</span>
+            <span>FluxConvert</span> · <span data-i18n="footer.version">v0.6 beta</span>
         </div>
         <div class="footer-links">
             <span class="footer-link" data-i18n="footer.link.about">À propos</span>
@@ -789,7 +791,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const endTimeGroup = document.getElementById('end_time-group');
     const startTimeInput = document.getElementById('start_time');
     const durationInput = document.getElementById('duration');
-       const endTimeInput = document.getElementById('end_time');
+    const endTimeInput = document.getElementById('end_time');
     const targetFormatSelect = document.getElementById('target_format');
     const qualitySelect = document.getElementById('quality');
     const resolutionSelect = document.getElementById('resolution');
@@ -807,7 +809,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const translations = {
         fr: {
             "header.title": "FluxConvert – Outils vidéo simples & rapides",
-            "header.subtitle": "Dépose un fichier, choisis un mode, récupère le résultat. C’est tout.",
+            "header.subtitle": "Dépose un fichier, choisis un mode, récupère le résultat.",
             "header.badge": "⚡ 100% gratuit • côté serveur",
             "header.themeDark": "Mode sombre",
             "header.themeLight": "Mode clair",
@@ -888,14 +890,14 @@ document.addEventListener("DOMContentLoaded", function () {
             "side.info.title": "Infos utiles",
             "side.info.text": "- Plus c’est compressé, plus tu perds un peu de détail.<br>- GIF = petit extrait, pas un film.<br>- Fichiers traités puis supprimés.",
             "side.info.legal": "Envoie uniquement des fichiers que tu as le droit d’utiliser.",
-            "footer.version": "v0.5 beta",
+            "footer.version": "v0.6 beta",
             "footer.link.about": "À propos",
             "footer.link.faq": "FAQ",
             "footer.link.contact": "Contact (bientôt)"
         },
         en: {
             "header.title": "FluxConvert – Simple & fast video tools",
-            "header.subtitle": "Drop a file, pick a mode, download. That’s it.",
+            "header.subtitle": "Drop a file, pick a mode, download.",
             "header.badge": "⚡ 100% free • server-side",
             "header.themeDark": "Dark mode",
             "header.themeLight": "Light mode",
@@ -976,7 +978,7 @@ document.addEventListener("DOMContentLoaded", function () {
             "side.info.title": "Good to know",
             "side.info.text": "- Stronger compression = less detail.<br>- GIF = small clip, not a movie.<br>- Files processed then removed.",
             "side.info.legal": "Only upload files you’re allowed to use.",
-            "footer.version": "v0.5 beta",
+            "footer.version": "v0.6 beta",
             "footer.link.about": "About",
             "footer.link.faq": "FAQ",
             "footer.link.contact": "Contact (soon)"
@@ -1199,8 +1201,6 @@ document.addEventListener("DOMContentLoaded", function () {
         secondaryFilename.textContent = file.name + " • " + sizeRounded + " Mo";
     }
 
-    dropzone.addEventListener('click', () => fileInput.click());
-
     dropzone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropzone.classList.add('dragover');
@@ -1286,7 +1286,6 @@ document.addEventListener("DOMContentLoaded", function () {
             fpsSelect.value = '30';
         }
 
-        // Zone 2ᵉ fichier
         if (mode === 'merge') {
             secondaryUpload.style.display = 'block';
         } else {
@@ -1295,7 +1294,6 @@ document.addEventListener("DOMContentLoaded", function () {
             file2Input.value = "";
         }
 
-        // Reset vitesse + reverse
         speedSelect.value = "1.0";
         reverseCheckbox.checked = false;
 
@@ -1396,9 +1394,56 @@ document.addEventListener("DOMContentLoaded", function () {
                 : "Time depends on file size.";
     });
 
+    function initTheme() {
+        const stored = localStorage.getItem('vc-theme');
+        if (stored === 'light' || stored === 'dark') {
+            applyTheme(stored);
+        } else {
+            const prefersLight = window.matchMedia &&
+                window.matchMedia('(prefers-color-scheme: light)').matches;
+            applyTheme(prefersLight ? 'light' : 'dark');
+        }
+    }
+
+    function applyTheme(theme) {
+        rootBody.setAttribute('data-theme', theme);
+        const dict = getDict();
+        if (theme === 'dark') {
+            themeToggleIcon.textContent = '🌙';
+            themeToggleLabel.textContent = dict["header.themeDark"];
+        } else {
+            themeToggleIcon.textContent = '☀️';
+            themeToggleLabel.textContent = dict["header.themeLight"];
+        }
+        localStorage.setItem('vc-theme', theme);
+    }
+
+    themeToggleBtn.addEventListener('click', () => {
+        const current = rootBody.getAttribute('data-theme') || 'dark';
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+    });
+
+    function detectPreset() {
+        const presetMode = rootBody.dataset.presetMode;
+        const presetFormat = rootBody.dataset.presetFormat;
+
+        if (presetMode) {
+            setMode(presetMode);
+        } else {
+            setMode('convert');
+        }
+
+        if (presetFormat) {
+            targetFormatSelect.value = presetFormat;
+        }
+
+        updateAdvancedSummary();
+    }
+
     initLang();
     initTheme();
-    setMode('convert');
+    detectPreset();
     advancedPanel.style.display = 'none';
 });
 </script>

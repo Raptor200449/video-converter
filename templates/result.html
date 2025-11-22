@@ -2,209 +2,200 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>FluxConvert – Résultat</title>
+    <title>Résultat – FluxConvert</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
+        :root {
+            --bg: #020617;
+            --card: #020617;
+            --border: #1f2937;
+            --text: #e5e7eb;
+            --text-soft: #9ca3af;
+            --accent: #6366f1;
+        }
         body {
             margin: 0;
             min-height: 100vh;
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
             background: radial-gradient(circle at top, #111827 0, #020617 40%, #000 100%);
-            color: #e5e7eb;
+            color: var(--text);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 24px;
         }
+        * { box-sizing: border-box; }
+
         .shell {
-            max-width: 720px;
+            max-width: 700px;
             width: 100%;
-            padding: 20px;
+            padding: 16px;
         }
         .card {
-            background: rgba(15, 23, 42, 0.95);
-            border-radius: 20px;
-            border: 1px solid #1f2937;
-            box-shadow: 0 18px 40px rgba(0,0,0,0.8), 0 0 0 1px rgba(148,163,184,0.2);
-            padding: 20px 20px 18px;
+            background: rgba(15, 23, 42, 0.96);
+            border-radius: 18px;
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.8);
+            padding: 18px 18px 16px;
         }
+
         .header {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 14px;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
         }
-        .logo {
-            width: 34px; height: 34px;
-            border-radius: 12px;
-            background: radial-gradient(circle at 30% 30%, #f97316, #ef4444, #6366f1);
-            display: flex; align-items: center; justify-content: center;
-            font-weight: 800; font-size: 18px; color: white;
-        }
-        h1 {
-            margin: 0;
-            font-size: 1.2rem;
-        }
-        .subtitle {
-            margin: 2px 0 0;
-            font-size: 0.85rem;
-            color: #9ca3af;
-        }
-        .badge {
-            font-size: 0.75rem;
-            border-radius: 999px;
-            padding: 4px 10px;
-            border: 1px solid rgba(148, 163, 184, 0.6);
-            color: #9ca3af;
-            white-space: nowrap;
-        }
-        .preview-card {
-            border-radius: 16px;
-            border: 1px solid #1f2937;
-            background: radial-gradient(circle at top left, rgba(56,189,248,0.10), rgba(15,23,42,0.96));
-            padding: 14px 14px 12px;
-        }
-        .preview-title {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 8px;
+        .brand {
             display: flex;
             align-items: center;
             gap: 8px;
         }
-        .preview-title span.icon {
+        .logo {
+            width: 30px;
+            height: 30px;
+            border-radius: 10px;
+            background: radial-gradient(circle at 30% 30%, #f97316, #ef4444, #6366f1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 16px;
+            color: white;
+        }
+        h1 {
             font-size: 1.1rem;
+            margin: 0;
         }
-        .meta {
+        .subtitle {
             font-size: 0.8rem;
-            color: #9ca3af;
-            margin-top: 6px;
+            color: var(--text-soft);
         }
-        .meta span.bold {
-            color: #e5e7eb;
-            font-weight: 500;
+
+        .preview {
+            margin-top: 12px;
+            border-radius: 14px;
+            border: 1px solid var(--border);
+            padding: 10px;
+            background: rgba(15,23,42,0.95);
+        }
+        .preview-title {
+            font-size: 0.9rem;
+            margin-bottom: 6px;
         }
         video, audio, img {
             width: 100%;
-            max-height: 320px;
-            border-radius: 12px;
-            background: #020617;
+            border-radius: 10px;
+            outline: none;
         }
+
+        .info {
+            margin-top: 10px;
+            font-size: 0.85rem;
+            color: var(--text-soft);
+        }
+        .info strong {
+            color: var(--text);
+        }
+
         .actions {
             margin-top: 14px;
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
-        .btn-primary {
+        .btn {
             border-radius: 999px;
             border: none;
-            padding: 9px 16px;
-            font-weight: 600;
+            padding: 9px 14px;
             font-size: 0.9rem;
+            font-weight: 600;
             cursor: pointer;
-            background: linear-gradient(135deg, #6366f1, #ec4899);
-            color: white;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 10px 25px rgba(129,140,248,0.4);
-            text-decoration: none;
-        }
-        .btn-secondary {
-            border-radius: 999px;
-            border: 1px solid rgba(148,163,184,0.6);
-            padding: 8px 14px;
-            font-size: 0.85rem;
-            cursor: pointer;
-            background: rgba(15,23,42,0.9);
-            color: #e5e7eb;
             display: inline-flex;
             align-items: center;
             gap: 6px;
             text-decoration: none;
         }
-        .hint {
-            margin-top: 10px;
-            font-size: 0.78rem;
-            color: #9ca3af;
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            color: white;
+            box-shadow: 0 10px 25px rgba(129,140,248,0.4);
         }
+        .btn-secondary {
+            background: rgba(15,23,42,0.9);
+            color: var(--text-soft);
+            border: 1px solid var(--border);
+        }
+        .btn span.icon {
+            font-size: 1rem;
+        }
+
         .footer {
-            margin-top: 14px;
-            padding-top: 8px;
-            border-top: 1px solid #1f2937;
+            margin-top: 12px;
             font-size: 0.75rem;
-            color: #6b7280;
+            color: var(--text-soft);
             display: flex;
             justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
+        }
+
+        @media (max-width: 600px) {
+            .actions {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
 <div class="shell">
     <div class="card">
-        <header class="header">
-            <div style="display:flex;align-items:center;gap:10px;">
+        <div class="header">
+            <div class="brand">
                 <div class="logo">FC</div>
                 <div>
-                    <h1>Conversion terminée ✅</h1>
-                    <p class="subtitle">
-                        Ton fichier est prêt. / Your file is ready.
-                    </p>
+                    <h1>Fichier prêt ✅</h1>
+                    <div class="subtitle">
+                        Tu peux le prévisualiser et le télécharger.
+                    </div>
                 </div>
             </div>
-            <div class="badge">
-                FluxConvert · simple & fast
-            </div>
-        </header>
+        </div>
 
-        <div class="preview-card">
+        <div class="preview">
             <div class="preview-title">
-                <span class="icon">📂</span>
-                <span>{{ filename }}</span>
+                Aperçu ({{ kind }})
             </div>
 
             {% if kind == "video" %}
-                <video controls src="{{ url_for('serve_file', filename=filename) }}"></video>
+                <video controls src="{{ url_for('file_preview', filename=filename) }}"></video>
             {% elif kind == "audio" %}
-                <audio controls src="{{ url_for('serve_file', filename=filename) }}"></audio>
+                <audio controls src="{{ url_for('file_preview', filename=filename) }}"></audio>
             {% elif kind == "gif" %}
-                <img src="{{ url_for('serve_file', filename=filename) }}" alt="GIF">
+                <img src="{{ url_for('file_preview', filename=filename) }}" alt="GIF généré">
             {% else %}
-                <p style="font-size:0.85rem;color:#d1d5db;">
-                    Aperçu non disponible pour ce type de fichier.
-                </p>
+                <p>Prévisualisation non disponible pour ce type de fichier.</p>
             {% endif %}
+        </div>
 
-            <div class="meta">
-                <span class="bold">Taille :</span>
-                {{ "%.1f"|format(size_mb) }} Mo
-                ·
-                <span class="bold">Type :</span>
-                {{ kind }}
-            </div>
+        <div class="info">
+            <div><strong>Nom :</strong> {{ filename }}</div>
+            <div><strong>Taille :</strong> {{ "%.1f"|format(size_mb) }} Mo</div>
         </div>
 
         <div class="actions">
-            <a class="btn-primary" href="{{ url_for('download_file', filename=filename) }}">
-                ⬇ Télécharger / Download
+            <a class="btn btn-primary" href="{{ url_for('download', filename=filename) }}">
+                <span class="icon">⬇</span>
+                <span>Télécharger le fichier</span>
             </a>
-            <a class="btn-secondary" href="{{ url_for('index') }}">
-                ↩ Nouveau fichier / New file
+            <a class="btn btn-secondary" href="{{ url_for('index') }}">
+                <span class="icon">🔁</span>
+                <span>Nouvelle conversion</span>
             </a>
         </div>
 
-        <p class="hint">
-            Tu peux garder cet onglet ouvert pendant le téléchargement.
-            / You can keep this tab open while the download finishes.
-        </p>
-
         <div class="footer">
-            <span>FluxConvert · v0.5 beta</span>
-            <span>Pas de compte, pas de pub. / No account, no ads.</span>
+            <span>FluxConvert · v0.6 beta</span>
+            <span>Les fichiers sont traités côté serveur puis nettoyés régulièrement.</span>
         </div>
     </div>
 </div>
