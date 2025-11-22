@@ -1,8 +1,17 @@
 import uuid
 import subprocess
 from pathlib import Path
+from mimetypes import guess_type
 
-from flask import Flask, render_template, request, send_file, abort
+from flask import (
+    Flask,
+    render_template,
+    request,
+    send_file,
+    abort,
+    redirect,
+    url_for,
+)
 
 app = Flask(__name__)
 
@@ -50,7 +59,7 @@ def build_ffmpeg_command(
 
     # Profil qualité vidéo
     vcodec = None
-    video_flags = []
+    video_flags: list[str] = []
     if operation in ("convert", "compress", "gif", "cut"):
         vcodec = "libx264"
 
@@ -62,7 +71,7 @@ def build_ffmpeg_command(
             video_flags.extend(["-crf", "23", "-preset", "medium"])
 
     # Résolution & FPS (pour la vidéo / GIF)
-    vf_parts = []
+    vf_parts: list[str] = []
     if resolution and resolution != "source":
         if resolution == "480p":
             vf_parts.append("scale=-2:480")
@@ -87,11 +96,11 @@ def build_ffmpeg_command(
         video_flags.extend(["-vf", ",".join(vf_parts)])
 
     # Bitrate + filtres audio
-    audio_flags = []
+    audio_flags: list[str] = []
     if audio_bitrate and audio_bitrate != "auto":
         audio_flags.extend(["-b:a", audio_bitrate])
 
-    audio_filter_parts = []
+    audio_filter_parts: list[str] = []
 
     # Vitesse audio (0.5–2.0 ok pour atempo)
     if speed_value != 1.0 and operation in ("convert", "compress", "gif", "cut", "audio"):
@@ -131,6 +140,63 @@ def build_ffmpeg_command(
 @app.route("/", methods=["GET"])
 def index():
     return render_template("index.html")
+
+
+@app.route("/result/<filename>", methods=["GET"])
+def result(filename: str):
+    """Page de résultat avec aperçu + bouton de téléchargement."""
+    output_path = OUTPUT_DIR / filename
+    if not output_path.exists():
+        abort(404, "Fichier introuvable")
+
+    ext = output_path.suffix.lower()
+    if ext in [".mp4", ".mkv", ".mov", ".webm"]:
+        kind = "video"
+    elif ext in [".mp3", ".wav", ".m4a", ".aac", ".flac", ".ogg"]:
+        kind = "audio"
+    elif ext == ".gif":
+        kind = "gif"
+    else:
+        kind = "other"
+
+    size_bytes = output_path.stat().st_size
+    size_mb = size_bytes / 1024 / 1024
+
+    return render_template(
+        "result.html",
+        filename=filename,
+        kind=kind,
+        size_mb=size_mb,
+    )
+
+
+@app.route("/file/<filename>", methods=["GET"])
+def serve_file(filename: str):
+    """Fichier pour preview (pas de 'as_attachment')."""
+    output_path = OUTPUT_DIR / filename
+    if not output_path.exists():
+        abort(404, "Fichier introuvable")
+
+    mime, _ = guess_type(str(output_path))
+    return send_file(
+        output_path,
+        mimetype=mime or "application/octet-stream",
+        as_attachment=False,
+    )
+
+
+@app.route("/download/<filename>", methods=["GET"])
+def download_file(filename: str):
+    """Téléchargement du fichier généré."""
+    output_path = OUTPUT_DIR / filename
+    if not output_path.exists():
+        abort(404, "Fichier introuvable")
+
+    return send_file(
+        output_path,
+        as_attachment=True,
+        download_name=output_path.name,
+    )
 
 
 @app.route("/convert", methods=["POST"])
@@ -221,11 +287,8 @@ def convert():
                 print("FFmpeg merge error:", completed.stderr)
                 abort(500, "Erreur pendant la fusion des vidéos.")
 
-            return send_file(
-                output_path,
-                as_attachment=True,
-                download_name=output_path.name,
-            )
+            # ✅ redirection vers page de résultat
+            return redirect(url_for("result", filename=output_path.name))
 
         finally:
             try:
@@ -274,11 +337,8 @@ def convert():
             print("FFmpeg error:", completed.stderr)
             abort(500, "Erreur pendant la conversion / compression du fichier.")
 
-        return send_file(
-            final_output_path,
-            as_attachment=True,
-            download_name=final_output_path.name,
-        )
+        # ✅ redirection vers page de résultat
+        return redirect(url_for("result", filename=final_output_path.name))
 
     finally:
         try:
